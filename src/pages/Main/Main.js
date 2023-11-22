@@ -4,6 +4,7 @@ import ACTIONS from '../../socket/actions';
 import { useNavigate } from 'react-router';
 import { v4 } from 'uuid';
 import './main.css'
+import Header from '../Header/header';
 
 function Main() {
     let navigate = useNavigate();
@@ -20,18 +21,21 @@ function Main() {
     }, []);
 
     return (
-        <div ref={rootNode}>
-            <ul>
-                <input type='text' value={room_id} onChange={(e) => setRoomId(e.target.value)} placeholder='room id' />
+        <div>
+            <Header/>
+            <div ref={rootNode}>
+                <ul>
+                    <input type='text' value={room_id} onChange={(e) => setRoomId(e.target.value)} placeholder='room id' />
+                    <button className='btn' onClick={() => {
+                        navigate(`/room/${room_id}`);
+                    }}>JOIN ROOM</button>
+                </ul>
                 <button className='btn' onClick={() => {
-                    navigate(`/room/${room_id}`);
-                }}>JOIN ROOM</button>
-            </ul>
-            <button className='btn' onClick={() => {
-                navigate(`/room/${v4()}`);
-            }}>
-                Create New Room
-            </button>
+                    navigate(`/room/${v4()}`);
+                }}>
+                    Create New Room
+                </button>
+            </div>
         </div>
     )
 }

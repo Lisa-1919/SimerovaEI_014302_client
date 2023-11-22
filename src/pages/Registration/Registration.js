@@ -1,127 +1,131 @@
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { isEmail } from "validator";
 import './Registration.css';
-import React, { useState, useRef } from 'react';
-import { isEmail } from 'validator';
 
-// import AuthService from "../../services/auth.server";
+import AuthService from '../../services/auth.server';
 
-const required = value => {
-  if (!value) {
-    return (
-      <div className="alert alert-danger" role="alert">
-        This field is required!
-      </div>
-    );
-  }
-};
 
-const email = value => {
+const email = (value) => {
   if (!isEmail(value)) {
     return (
-      <div role="alert">
+      <div className="alert alert-danger" role="alert">
         This is not a valid email.
       </div>
     );
   }
 };
 
-const vusername = value => {
+const vusername = (value) => {
   if (value.length < 3 || value.length > 20) {
     return (
-      <div role="alert">
+      <div className="alert alert-danger" role="alert">
         The username must be between 3 and 20 characters.
       </div>
     );
   }
 };
 
-const vpassword = value => {
+const vpassword = (value) => {
   if (value.length < 6 || value.length > 40) {
     return (
-      <div role="alert">
+      <div className="alert alert-danger" role="alert">
         The password must be between 6 and 40 characters.
       </div>
     );
   }
 };
-const vpasswordConfirm = (password, value) => {
-  if (password !== value) {
-    return (
-      <div role="alert">
-        The passwordConfirm must be equal password.
-      </div>
-    );
-  }
-};
 
-function Registration() {
-  const form = useRef();
-  const checkBtn = useRef();
+const Registration = () => {
+  const { register, handleSubmit, formState: { errors } } = useForm();
+  const [message, setMessage] = useState('');
+  const [successful, setSuccessful] = useState(false);
 
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const onSubmit = (data) => {
+    setMessage('');
+    setSuccessful(false);
 
-  const handleRegister = (e) => {
-    // register logic
-
-    if (checkBtn.current.context._errors.length === 0) {
-
-      console.log(username, email, password, passwordConfirm);
-      // AuthService.register(username, email, password)
-      //   .then(() => {
-      //     // success callback
-      //   })
-      //   .catch(() => {
-      //     // error callback 
-      //   });
+    if (Object.keys(errors).length === 0) {
+      AuthService.register(data.username, data.email, data.password)
+        .then(
+          (response) => {
+            setMessage(response.data.message);
+            setSuccessful(true);
+          },
+          (error) => {
+            const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
+            setMessage(resMessage);
+            setSuccessful(false);
+          }
+        );
     }
-  }
+  };
 
   return (
-    <div className='page'>
-      <div className='registration'>
-        <h1>Registration</h1>
-        <div className='right-align'>
-          <div className='inputs'>
-            <input
-              type="text"
-              className="form-control"
-              name="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <input
-              type='email'
-              className="form-control"
-              name="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-              type="password"
-              className="form-control"
-              name="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <input
-              className="form__input"
-              type="password"
-              value={passwordConfirm}
-              onChange={(e) => setPasswordConfirm(e.target.value)}
-              placeholder="Confirm Password" />
+    <div>
+
+      <form onSubmit={handleSubmit(onSubmit)}>
+        {!successful && (
+          <div className='registration'>
+            <p>Регистрация</p>
+            <div className='right-align'>
+              <div className='inputs'>
+                <div className="form-group">
+                  <input
+                    type="text"
+                    name="username"
+                    placeholder='Username'
+                    {...register('username', { required: true, validate: vusername })}
+                  />
+                  {errors.username && <p>{errors.username.message}</p>}
+                </div>
+
+                <div className="form-group">
+                  <input
+                    type="text"
+                    name="email"
+                    {...register('email', { required: true, validate: email })}
+                  />
+                  {errors.email && <p>{errors.email.message}</p>}
+                </div>
+                <div className="form-group">
+                  <input
+                    type="password"
+                    name="password"
+                    {...register('password', { required: true, validate: vpassword })}
+                  />
+                  {errors.password && <p>{errors.password.message}</p>}
+                </div>
+                <div className="form-group">
+                  <input
+                    type="password"
+                    name="password_confirm"
+                    {...register('password_confirm', { required: true, validate: vpassword })}
+                  />
+                  {errors.password && <p>{errors.password.message}</p>}
+                </div>
+              </div>
+              <div className='link'>
+                <a href='/'>Login</a>
+              </div>
+            </div>
+            <button className="btn">Sign Up</button>
           </div>
-          <div className='link'>
-            <a href='/login'>Login</a>
-          </div>
-        </div>
-        <div>
-          <button onClick={() => handleRegister()}
-           type="submit" class="btn">Sign up</button>
-        </div>
-      </div>
-    </div>
-  )
-}
+        )
+        }
+
+        {
+          message && (
+            <div className="form-group">
+              <div className={successful ? 'alert alert-success' : 'alert alert-danger'} role="alert">
+                {message}
+              </div>
+            </div>
+          )
+        }
+      </form >
+    </div >
+  );
+};
+
 export default Registration;
