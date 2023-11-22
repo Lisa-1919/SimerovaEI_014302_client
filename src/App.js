@@ -6,6 +6,7 @@ import NotFound404 from './pages/NotFound404/NotFound404';
 import Registration from './pages/Registration/Registration';
 import Login from './pages/Login/Login';
 import AuthGuard from './services/auth.guard';
+import './n18';
 
 function App() {
   return (

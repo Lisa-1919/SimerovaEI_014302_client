@@ -12,6 +12,7 @@ function Main() {
     const [room_id, setRoomId] = useState("");
     const rootNode = useRef();
 
+
     useEffect(() => {
         socket.on(ACTIONS.SHARE_ROOMS, ({ rooms = [] } = {}) => {
             if (rootNode.current) {
