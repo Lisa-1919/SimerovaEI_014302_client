@@ -1,0 +1,9 @@
+.play-window{
+    width: 519px;
+    height: 455px;
+    border-radius: 25px;  
+}
+video {
+    width: 519px;
+    border-radius: 25px;
+}
