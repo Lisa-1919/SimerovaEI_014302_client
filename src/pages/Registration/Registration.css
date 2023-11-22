@@ -1,0 +1,53 @@
+.registration {
+    width: 519.054px;
+    height: 530.797px;
+    margin-top: 112px;
+    margin-left: 804px;
+    border-radius: 25px;
+    background: #FFF;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-around;
+    flex-direction: column;
+}
+
+.right-align{
+    width: 319px;
+    height: 261px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.inputs {
+    width: 318.635px;
+    height: 224.688px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+input {
+    width: 318.635px;
+    height: 41.493px;
+    border-radius: 34px;
+    border-top: 0;
+    border-right: 2px solid #5D71BD;
+    border-bottom: 3px solid #5D71BD;
+    border-left: 2px solid #5D71BD;
+    color: #BFA181;
+
+    font-family: 'Comfortaa';
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-align: center;
+}
+
+
+.btn{
+    width: 137px;
+    height: 48.194px;
+}
