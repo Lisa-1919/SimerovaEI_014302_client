@@ -1,9 +1,34 @@
+.room{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.room-id{
+    position: fixed; 
+    top: 3%;
+    left: 3%;
+    transform: translate(-3%, -3%);
+    font-family: 'Comfortaa', sans-serif;
+    color: #BFA181;
+    font-size: 1em;
+}
+
+.call{
+    margin-top: 2%;
+    margin-left: 2%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
 .play-window{
-    width: 519px;
-    height: 455px;
+    width: 30%;
+    height: 55%;
     border-radius: 25px;  
 }
 video {
-    width: 519px;
+    width: 30%;
     border-radius: 25px;
 }

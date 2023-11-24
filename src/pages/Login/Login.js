@@ -3,6 +3,9 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import '../Registration/Registration.css';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from "react-i18next";
+import LanguageDropdown from '../../components/LangDropdown/LanguageDropdown';
+
 
 
 const Login = () => {
@@ -10,6 +13,7 @@ const Login = () => {
   const [message, setMessage] = useState('');
   const [successful, setSuccessful] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const onSubmit = (data) => {
     setMessage('');
@@ -33,17 +37,18 @@ const Login = () => {
 
   return (
     <div>
+      <LanguageDropdown/>
       <form onSubmit={handleSubmit(onSubmit)}>
         {!successful && (
           <div className='registration'>
-            <p>Login</p>
+            <p>{t("auth")}</p>
             <div className='right-align'>
               <div className='inputs'>
                 <div className="form-group">
                   <input
                     type="text"
                     name="username"
-                    placeholder='Username'
+                    placeholder={t("login")}
                     {...register('username', { required: true })}
                   />
                   {errors.username && <p>{errors.username.message}</p>}
@@ -52,16 +57,17 @@ const Login = () => {
                   <input
                     type="password"
                     name="password"
+                    placeholder={t("password")}
                     {...register('password', { required: true })}
                   />
                   {errors.password && <p>{errors.password.message}</p>}
                 </div>
               </div>
               <div className='link'>
-                <a href='/registration'>Register</a>
+                <a href='/registration'>{t("registration")}</a>
               </div>
             </div>
-            <button className="btn">Sign In</button>
+            <button className="btn">{t("sign_in")}</button>
           </div>
         )}
         {message && (

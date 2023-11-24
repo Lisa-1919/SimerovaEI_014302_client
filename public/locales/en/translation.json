@@ -1,0 +1,22 @@
+{
+    "lang": "English",
+    "select_lang": "select a language",
+    "login": "login",
+    "password": "password",
+    "confirm_p": "confirm password",
+    "registration": "Registration",
+    "auth": "Authorizathion",
+    "sign_in": "Sign In",
+    "sign_up": "Sign Up",
+    "join_room": "Join",
+    "create_room": "Create room",
+    "room_id": "Room ID",
+    "email": "email",
+    "v_email": "This is not a valid email.",
+    "v_login": "Login must be between 3 and 20 characters.",
+    "v_password": "The password must be between 6 and 40 characters.",
+    "v_confirm_p": "Passwords don't match.",
+    "taken_login": "",
+    "taken_email": "",
+    "not_found": "Something went wrong :("
+}

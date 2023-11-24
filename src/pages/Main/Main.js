@@ -3,14 +3,16 @@ import socket from '../../socket'
 import ACTIONS from '../../socket/actions';
 import { useNavigate } from 'react-router';
 import { v4 } from 'uuid';
-import './main.css'
-import Header from '../Header/header';
+import Header from '../../components/Header/header';
+import { useTranslation } from "react-i18next";
+import './main.css';
 
 function Main() {
     let navigate = useNavigate();
     const [rooms, updateRooms] = useState([]);
     const [room_id, setRoomId] = useState("");
     const rootNode = useRef();
+    const { t } = useTranslation();
 
 
     useEffect(() => {
@@ -23,19 +25,23 @@ function Main() {
 
     return (
         <div>
-            <Header/>
-            <div ref={rootNode}>
-                <ul>
-                    <input type='text' value={room_id} onChange={(e) => setRoomId(e.target.value)} placeholder='room id' />
-                    <button className='btn' onClick={() => {
-                        navigate(`/room/${room_id}`);
-                    }}>JOIN ROOM</button>
-                </ul>
-                <button className='btn' onClick={() => {
-                    navigate(`/room/${v4()}`);
-                }}>
-                    Create New Room
-                </button>
+            <Header />
+            <div className='room_actions'>
+                <div ref={rootNode}>
+                    <div className='join'>
+                        <input type='text' value={room_id} onChange={(e) => setRoomId(e.target.value)} placeholder={t("room_id")} />
+                        <button className='btn' onClick={() => {
+                            navigate(`/room/${room_id}`);
+                        }}>{t("join_room")}</button>
+                    </div>
+                    <div className='create'>
+                        <button className='btn' onClick={() => {
+                            navigate(`/room/${v4()}`);
+                        }}>
+                            {t("create_room")}
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     )

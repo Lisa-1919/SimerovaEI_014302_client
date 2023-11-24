@@ -1,5 +1,17 @@
-.btn{
-    width: 225px;
-    height: 55px;
-    color: #BFA181;
+.room_actions{
+    width: 90%;
+    position: fixed;
+    margin-top: 7%;
+    left: 50%;
+    transform: translate(-50%, -7%);
+    display: block;
+}
+
+.join{
+    margin-bottom: 3%;
+    display: inline-flex;
+    justify-content: space-between;
+}
+.join input{
+    margin-right: 2%;
 }
