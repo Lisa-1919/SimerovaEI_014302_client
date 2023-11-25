@@ -5,15 +5,15 @@ import './LangDropdown.css';
 
 const languages = [
   { name: 'English', code: 'en' },
-  { name: 'Китайский', code: 'zh' },
-  { name: 'Испанский', code: 'es' },
-  { name: 'Французский', code: 'fr' },
-  { name: 'Немецкий', code: 'de' },
-  { name: 'Итальянский', code: 'it' },
-  { name: 'Арабский', code: 'ar' },
+  { name: '中文', code: 'zh' },
+  { name: 'Español', code: 'es' },
+  { name: 'Français', code: 'fr' },
+  { name: 'Deutsch', code: 'de' },
+  { name: 'Italiano', code: 'it' },
+  { name: 'عرب', code: 'ar' },
   { name: 'Русский', code: 'ru' },
-  { name: 'Португальский', code: 'pt' },
-  { name: 'Японский', code: 'ja' },
+  { name: 'Português', code: 'pt' },
+  { name: '日本語', code: 'ja' },
 ];
 
 const LanguageDropdown = () => {

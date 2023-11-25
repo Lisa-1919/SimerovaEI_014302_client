@@ -9,6 +9,7 @@ import AuthGuard from './services/auth.guard';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './18n';
 import SubtitleGenerator from './pages/SubtitleGenerator';
+import Settings from './pages/Settings/Settings';
 
 function App() {
   return (
@@ -18,12 +19,11 @@ function App() {
           <Routes>
             <Route exact path="/" element={<Login />} />
             <Route exact path="/registration" element={<Registration />} />
-            {/* <Route element={<AuthGuard />}> */}
-            <Route exact path="/room/:id" element={<Room />} />
-
-            <Route exact path="/home" element={<Main />} />
-            <Route exact path="/sub" element={<SubtitleGenerator />} />
-            {/* </Route> */}
+            <Route element={<AuthGuard />}>
+              <Route exact path="/room/:id" element={<Room />} />
+              <Route exact path="/settings" element={<Settings />} />
+              <Route exact path="/home" element={<Main />} />
+            </Route>
             <Route path='*' element={<NotFound404 />} />
           </Routes>
         </I18nextProvider>

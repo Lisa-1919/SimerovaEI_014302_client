@@ -1,0 +1,8 @@
+.settings{
+    width: 90%;
+    position: fixed;
+    margin-top: 7%;
+    left: 50%;
+    transform: translate(-50%, -7%);
+    display: block; 
+}

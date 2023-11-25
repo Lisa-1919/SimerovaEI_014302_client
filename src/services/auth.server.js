@@ -51,6 +51,19 @@ class AuthService {
     return JSON.parse(localStorage.getItem('user'));
   }
 
+  changePassword(username, oldPassword, newPassword) {
+    return axios
+      .post(API_URL + "changepassword", {
+        username,
+        oldPassword,
+        newPassword
+      })
+      .then(response => {
+        return response.data;
+      });
+  }
+  
+
 }
 
 export default new AuthService();

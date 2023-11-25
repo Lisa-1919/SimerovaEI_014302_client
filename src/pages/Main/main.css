@@ -1,10 +1,26 @@
-.room_actions{
+.main{
     width: 90%;
     position: fixed;
     margin-top: 7%;
     left: 50%;
     transform: translate(-50%, -7%);
     display: block;
+}
+
+.user-info{
+    height: max-content;
+    display: inline-flex;
+    margin-bottom: 2%;
+}
+
+.text{
+    margin-left: 3%;
+}
+
+.user-data-text{
+    font-size: 1.5em;
+    width: auto;
+    height: fit-content;
 }
 
 .join{

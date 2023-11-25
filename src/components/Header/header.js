@@ -22,7 +22,7 @@ const Header = () => {
             <div className="user">
                 <LanguageDropdown />
                 <div className='link'>
-                    <a href='/settings'>Settings</a>
+                    <a href='/settings'>{t("settings")}</a>
                 </div>
                 <div className='logout'>
                     <button onClick={handleLogout}>logout</button>

@@ -6,21 +6,38 @@ import authServer from '../../services/auth.server';
 const Photo = () => {
     const { t } = useTranslation();
     const [selectedImage, setSelectedImage] = useState(null);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const handleImageUpload = async (event) => {
         const file = event.target.files[0];
-        const reader = new FileReader();
-        reader.onload = () => {
-            setSelectedImage(reader.result);
-        };
+        const fileSizeLimit = 10 * 1024 * 1024; // 10MB in bytes
 
-        if (file) {
+        if (file && file.size <= fileSizeLimit) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                setSelectedImage(reader.result);
+            };
+
             reader.readAsDataURL(file);
+            // try {
+            //     const response = await authServer.handleUpload(file);
+            //     console.log(response);
+            // } catch (error) {
+            //     console.error(error);
+            // }
+            // setErrorMessage("");
+        } else {
+            setErrorMessage("Please select another image. The file size should not exceed 10MB.");
+        }
+    };
+
+    const handleSaveImage = async () => {
+        if (selectedImage) {
             try {
-                const response = await authServer.handleUpload(file);
-                console.log(response); // Handle the response from the server if needed
+                const response = await authServer.handleUpload(selectedImage);
+                console.log(response);
             } catch (error) {
-                console.error(error); // Handle any errors that occur during the upload
+                console.error(error);
             }
         }
     };
@@ -31,7 +48,7 @@ const Photo = () => {
             {selectedImage ? (
               <img src={selectedImage} alt="Фото" className="rounded-photo" />
             ) : (
-              <div className="placeholder">{t("select_img")}</div>
+              <div className="placeholder">{errorMessage || t("select_img")}</div>
             )}
           </div>
           <label htmlFor="file-upload" className="upload-button">
@@ -44,32 +61,13 @@ const Photo = () => {
             onChange={handleImageUpload}
             className="select-img"
           />
+          {selectedImage && (
+            <button onClick={handleSaveImage} className="save-button">
+              Save
+            </button>
+          )}
         </div>
       );
 };
 
 export default Photo;
-
-
-// const handleImageUpload = (event) => {
-//     const file = event.target.files[0];
-//     const formData = new FormData();
-//     formData.append('image', file);
-  
-//     // Send the image file to the server
-//     fetch('/upload', {
-//       method: 'POST',
-//       body: formData,
-//     })
-//       .then((response) => response.json())
-//       .then((data) => {
-//         // Handle the response from the server, if needed
-//         console.log(data);
-//         setSelectedImage(data.imageUrl);
-//       })
-//       .catch((error) => {
-//         // Handle any errors that occur during the upload
-//         console.error(error);
-//       });
-//   };
-  
