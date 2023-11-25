@@ -6,27 +6,37 @@ import { v4 } from 'uuid';
 import Header from '../../components/Header/header';
 import { useTranslation } from "react-i18next";
 import './main.css';
+import authServer from '../../services/auth.server';
+import Photo from '../../components/Photo/Photo';
+
+
 
 function Main() {
     let navigate = useNavigate();
-    const [rooms, updateRooms] = useState([]);
     const [room_id, setRoomId] = useState("");
     const rootNode = useRef();
     const { t } = useTranslation();
+    // const user = authServer.getCurrentUser();
 
 
     useEffect(() => {
         socket.on(ACTIONS.SHARE_ROOMS, ({ rooms = [] } = {}) => {
-            if (rootNode.current) {
-                updateRooms(rooms);
-            }
+            // if (rootNode.current) {
+            //     updateRooms(rooms);
+            // }
         });
     }, []);
 
     return (
         <div>
             <Header />
+            
             <div className='room_actions'>
+                {/* <p>{user.username}</p>
+                <p>{user.email}</p> */}
+                <div className='image'>
+                    <Photo />
+                </div>
                 <div ref={rootNode}>
                     <div className='join'>
                         <input type='text' value={room_id} onChange={(e) => setRoomId(e.target.value)} placeholder={t("room_id")} />

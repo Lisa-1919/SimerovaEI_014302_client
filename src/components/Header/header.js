@@ -22,7 +22,7 @@ const Header = () => {
             <div className="user">
                 <LanguageDropdown />
                 <div className='link'>
-                    <a href='/profile'>Profile</a>
+                    <a href='/settings'>Settings</a>
                 </div>
                 <div className='logout'>
                     <button onClick={handleLogout}>logout</button>

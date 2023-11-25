@@ -18,6 +18,23 @@ class AuthService {
       });
   }
 
+  handleUpload(file) {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const user = JSON.parse(localStorage.getItem('user'));
+    const token = user.accessToken;
+
+    return axios.post(API_URL + 'upload_img', formData, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+      .then(response => {
+        return response.data;
+      });
+  };
+
   logout() {
     localStorage.removeItem("user");
   }
@@ -31,8 +48,9 @@ class AuthService {
   }
 
   getCurrentUser() {
-    return JSON.parse(localStorage.getItem('user'));;
+    return JSON.parse(localStorage.getItem('user'));
   }
+
 }
 
 export default new AuthService();
