@@ -19,11 +19,11 @@ function App() {
           <Routes>
             <Route exact path="/" element={<Login />} />
             <Route exact path="/registration" element={<Registration />} />
-            <Route element={<AuthGuard />}>
+            {/* <Route element={<AuthGuard />}> */}
               <Route exact path="/room/:id" element={<Room />} />
               <Route exact path="/settings" element={<Settings />} />
               <Route exact path="/home" element={<Main />} />
-            </Route>
+            {/* </Route> */}
             <Route path='*' element={<NotFound404 />} />
           </Routes>
         </I18nextProvider>

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/auth/";
+const API_URL = "http://localhost:8080/";
 
 class AuthService {
   login(username, password) {
@@ -27,8 +27,10 @@ class AuthService {
 
     return axios.post(API_URL + 'upload_img', formData, {
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+      formData
     })
       .then(response => {
         return response.data;

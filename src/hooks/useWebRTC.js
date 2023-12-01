@@ -50,7 +50,7 @@ export default function useWebRTC(roomID) {
             peerConnections.current[peerID].ontrack = ({ streams: [remoteStream] }) => {
                 tracksNumber++
 
-                if (tracksNumber === 2) { // video & audio tracks received
+                if (tracksNumber === 2) {
                     tracksNumber = 0;
                     addNewClient(peerID, () => {
                         if (peerMediaElements.current[peerID]) {
@@ -197,17 +197,14 @@ export default function useWebRTC(roomID) {
         socket.emit(ACTIONS.LEAVE);
     }, []);
 
-    // Функция для отправки аудио данных на сервер
     const sendAudioData = (data, targetLanguage) => {
         socket.emit("audio_data", data, targetLanguage);
     };
 
-    // Обработчик для получения переведенных данных от сервера
+
     socket.on("translated_audio_data", (translatedData) => {
-        // Обработка переведенных данных
+    
     });
-
-
 
     return {
         clients,

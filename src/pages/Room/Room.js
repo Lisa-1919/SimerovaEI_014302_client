@@ -81,7 +81,7 @@ export default function Room() {
       <div className="room">
         <div className="room-id">
           {t('room_id')}: {roomID}
-          <button className='btn'></button>
+          <button className='btn'>send</button>
         </div>
         <div className="call">
           {clients.map((clientID, index) => {
