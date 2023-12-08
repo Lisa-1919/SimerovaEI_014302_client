@@ -10,6 +10,25 @@ export default function useWebRTC(roomID) {
     const [isCameraOn, setCameraOn] = useState(true);
     const [isMicrophoneOn, setMicrophoneOn] = useState(true);
 
+    const [messages, setMessages] = useState([]); // State to store text chat messages
+
+    const sendChatMessage = useCallback((message) => {
+        // Send the message to the server or other clients
+        socket.emit("textChatMessage", { roomID, message });
+        // No need to update the local state here, as the message will be received and updated separately
+      }, [roomID]);
+    
+      // Handle incoming text chat messages
+      useEffect(() => {
+        socket.on("textChatMessage", ({ sender, message }) => {
+          // Add the received message to the local state for display
+          setMessages(prevMessages => [...prevMessages, { text: message, sender }]);
+        });
+    
+        return () => {
+          socket.off("textChatMessage");
+        };
+      }, [setMessages]);
 
     const addNewClient = useCallback((newClient, cb) => {
         updateClients(list => {
@@ -26,6 +45,22 @@ export default function useWebRTC(roomID) {
     const peerMediaElements = useRef({
         [LOCAL_VIDEO]: null,
     });
+
+    const toggleCamera = useCallback(() => {
+        setCameraOn(prevState => {
+            const videoTrack = localMediaStream.current.getVideoTracks()[0];
+            videoTrack.enabled = !prevState; // Toggle the enabled state of the video track
+            return !prevState;
+        });
+    }, []);
+
+    const toggleMicrophone = useCallback(() => {
+        setMicrophoneOn(prevState => {
+            const audioTrack = localMediaStream.current.getAudioTracks()[0];
+            audioTrack.enabled = !prevState;
+            return !prevState;
+        });
+    }, []);
 
     useEffect(() => {
         async function handleNewPeer({ peerID, createOffer }) {
@@ -197,18 +232,13 @@ export default function useWebRTC(roomID) {
         socket.emit(ACTIONS.LEAVE);
     }, []);
 
-    const sendAudioData = (data, targetLanguage) => {
-        socket.emit("audio_data", data, targetLanguage);
-    };
-
-
-    socket.on("translated_audio_data", (translatedData) => {
-    
-    });
-
     return {
         clients,
         provideMediaRef,
-        handleLeave
+        handleLeave,
+        toggleCamera,
+        toggleMicrophone,
+        messages, // Include the messages state in the returned object
+        sendChatMessage, // Include the sendChatMessage function in the returned object
     };
 }

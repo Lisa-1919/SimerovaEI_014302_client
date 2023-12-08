@@ -4,8 +4,8 @@ import { v4 } from 'uuid';
 import Header from '../../components/Header/header';
 import { useTranslation } from "react-i18next";
 import './main.css';
-import authServer from '../../services/auth.server';
-import Photo from '../../components/Photo/Photo';
+// import authServer from '../../services/auth.server';
+// import Photo from '../../components/Photo/Photo';
 
 
 
@@ -14,19 +14,19 @@ function Main() {
     const [room_id, setRoomId] = useState("");
     const rootNode = useRef();
     const { t } = useTranslation();
-    const user = authServer.getCurrentUser();
+    // const user = authServer.getCurrentUser();
 
     return (
         <div>
             <Header />
             <div className='main'>
-                <div className='user-info'>
+                {/* <div className='user-info'>
                     <Photo />
                     <div className='text'>
                         <p className='user-data-text'>{user.username}</p>
                         <p className='user-data-text'>{user.email}</p>
                     </div>
-                </div>
+                </div> */}
 
                 <div className='room_actions'>
 

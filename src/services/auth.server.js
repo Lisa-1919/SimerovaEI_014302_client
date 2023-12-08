@@ -2,6 +2,7 @@ import axios from "axios";
 
 const API_URL = "http://localhost:8080/";
 
+
 class AuthService {
   login(username, password) {
     return axios
@@ -21,21 +22,42 @@ class AuthService {
   handleUpload(file) {
     const formData = new FormData();
     formData.append('image', file);
-
+  
     const user = JSON.parse(localStorage.getItem('user'));
     const token = user.accessToken;
-
+  
     return axios.post(API_URL + 'upload_img', formData, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "multipart/form-data",
       },
-      formData
     })
       .then(response => {
         return response.data;
       });
   };
+  
+
+  // handleUpload(file) {
+  //   const formData = new FormData();
+  //   formData.append('image', file);
+
+  //   const user = JSON.parse(localStorage.getItem('user'));
+  //   const token = user.accessToken;
+
+  //   return axios.post(API_URL + 'upload_img', formData, {
+  //     headers: {
+  //       Authorization: `Bearer ${token}`,
+  //       "Content-Type": "multipart/form-data",
+  //       credentials: true,            //access-control-allow-credentials:true
+  //       optionSuccessStatus: 200,
+  //     },
+  //     formData
+  //   })
+  //     .then(response => {
+  //       return response.data;
+  //     });
+  // };
 
   logout() {
     localStorage.removeItem("user");
@@ -64,8 +86,6 @@ class AuthService {
         return response.data;
       });
   }
-  
-
 }
 
 export default new AuthService();

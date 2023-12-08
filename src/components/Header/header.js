@@ -5,9 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import LanguageDropdown from "../LangDropdown/LanguageDropdown";
 import { useTranslation } from "react-i18next";
 
+
 const Header = () => {
     const navigate = useNavigate();
-    const { t, i18n } = useTranslation();
+    const { t} = useTranslation();
     const handleLogout = () => {
         AuthService.logout();
         navigate('/');
@@ -25,7 +26,8 @@ const Header = () => {
                     <a href='/settings'>{t("settings")}</a>
                 </div>
                 <div className='logout'>
-                    <button onClick={handleLogout}>logout</button>
+
+                    <button><img src='../../media/exit.png' alt="logout" onClick={handleLogout} className="logout-img"/></button>
                 </div>
             </div>
         </div>
