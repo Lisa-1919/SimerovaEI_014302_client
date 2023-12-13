@@ -1,6 +1,5 @@
 const path = require('path');
 const express = require('express');
-
 const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
@@ -89,6 +88,14 @@ io.on('connection', socket => {
             peerID: socket.id,
             iceCandidate,
         });
+    });
+
+    socket.on(ACTIONS.RECEIVE_MESSAGE, ({ message }) => {
+        io.emit(ACTIONS.RECEIVE_MESSAGE, { message });
+    });
+      
+    socket.on(ACTIONS.SEND_MESSAGE, ({ message }) => {
+        io.emit(ACTIONS.SEND_MESSAGE, { message });
     });
 
 });
