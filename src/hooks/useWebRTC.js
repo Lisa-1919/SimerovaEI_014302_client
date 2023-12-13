@@ -3,32 +3,45 @@ import freeice from "freeice";
 import socket from "../socket";
 import ACTIONS from "../socket/actions";
 import useStateWithCallback from "./useStateWithCallback";
+import i18n from "../18n";
+
+import axios from 'axios';
+
+const translateMessage = async (message, targetLanguage) => {
+    const encodedParams = new URLSearchParams();
+    encodedParams.set('from', 'auto');
+    encodedParams.set('to', targetLanguage);
+    encodedParams.set('text', message);
+
+    const options = {
+        method: 'POST',
+        url: 'https://google-translate113.p.rapidapi.com/api/v1/translator/text',
+        headers: {
+            'content-type': 'application/x-www-form-urlencoded',
+            'X-RapidAPI-Key': '',
+            'X-RapidAPI-Host': 'google-translate113.p.rapidapi.com'
+        },
+        data: encodedParams,
+    };
+
+    try {
+        const response = await axios.request(options);
+        console.log(response.data);
+        return response.data.trans;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+};
 
 export const LOCAL_VIDEO = 'LOCAL_VIDEO';
 export default function useWebRTC(roomID) {
     const [clients, updateClients] = useStateWithCallback([]);
     const [isCameraOn, setCameraOn] = useState(true);
     const [isMicrophoneOn, setMicrophoneOn] = useState(true);
+    const [messages, setMessages] = useState([]);
 
-    const [messages, setMessages] = useState([]); // State to store text chat messages
-
-    const sendChatMessage = useCallback((message) => {
-        // Send the message to the server or other clients
-        socket.emit("textChatMessage", { roomID, message });
-        // No need to update the local state here, as the message will be received and updated separately
-      }, [roomID]);
-    
-      // Handle incoming text chat messages
-      useEffect(() => {
-        socket.on("textChatMessage", ({ sender, message }) => {
-          // Add the received message to the local state for display
-          setMessages(prevMessages => [...prevMessages, { text: message, sender }]);
-        });
-    
-        return () => {
-          socket.off("textChatMessage");
-        };
-      }, [setMessages]);
+    const selectedLanguage = i18n.language;
 
     const addNewClient = useCallback((newClient, cb) => {
         updateClients(list => {
@@ -49,7 +62,7 @@ export default function useWebRTC(roomID) {
     const toggleCamera = useCallback(() => {
         setCameraOn(prevState => {
             const videoTrack = localMediaStream.current.getVideoTracks()[0];
-            videoTrack.enabled = !prevState; // Toggle the enabled state of the video track
+            videoTrack.enabled = !prevState;
             return !prevState;
         });
     }, []);
@@ -60,6 +73,27 @@ export default function useWebRTC(roomID) {
             audioTrack.enabled = !prevState;
             return !prevState;
         });
+    }, []);
+
+    const sendMessage = useCallback(async (message) => {
+        //const translatedMessage = await translateMessage(message, selectedLanguage);
+        // if (translatedMessage) {
+        Object.keys(peerConnections.current).forEach((peerID) => {
+            const dataChannel = peerConnections.current[peerID].createDataChannel('chat');
+            dataChannel.onopen = () => {
+                dataChannel.send(message);
+            };
+        });
+        setMessages(prevMessages => [...prevMessages, message]);
+        //}
+    }, []);
+
+    // Function to handle incoming chat messages
+    const handleIncomingMessage = useCallback(async (message) => {
+        const translatedMessage = await translateMessage(message, selectedLanguage);
+        if (translatedMessage) {
+            setMessages(prevMessages => [...prevMessages, translatedMessage]);
+        }
     }, []);
 
     useEffect(() => {
@@ -80,6 +114,23 @@ export default function useWebRTC(roomID) {
                     });
                 }
             }
+
+            const dataChannel = peerConnections.current[peerID].createDataChannel('chat');
+
+            dataChannel.onopen = () => {
+                console.log('Data channel is open');
+            };
+
+            dataChannel.onmessage = (event) => {
+                handleIncomingMessage(event.data);
+            };
+
+            peerConnections.current[peerID].ondatachannel = (event) => {
+                const receiveChannel = event.channel;
+                receiveChannel.onmessage = (event) => {
+                    handleIncomingMessage(event.data);
+                };
+            };
 
             let tracksNumber = 0;
             peerConnections.current[peerID].ontrack = ({ streams: [remoteStream] }) => {
@@ -196,6 +247,7 @@ export default function useWebRTC(roomID) {
                         height: 720
                     }
                 });
+
             } catch (err) {
                 console.error("Error capturing local stream", err);
                 return;
@@ -232,13 +284,23 @@ export default function useWebRTC(roomID) {
         socket.emit(ACTIONS.LEAVE);
     }, []);
 
+
+
+    useEffect(() => {
+        socket.on(ACTIONS.RECEIVE_MESSAGE, handleIncomingMessage);
+
+        return () => {
+            socket.off(ACTIONS.RECEIVE_MESSAGE);
+        }
+    }, []);
+
     return {
         clients,
         provideMediaRef,
         handleLeave,
         toggleCamera,
         toggleMicrophone,
-        messages, // Include the messages state in the returned object
-        sendChatMessage, // Include the sendChatMessage function in the returned object
+        messages, // Return the chat messages
+        sendMessage, // Return the function to send chat messages
     };
 }

@@ -5,52 +5,20 @@ import './room.css';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
-
-function layout(clientsNumber = 1) {
-  const pairs = Array.from({ length: clientsNumber })
-    .reduce((acc, next, index, arr) => {
-      if (index % 2 === 0) {
-        acc.push(arr.slice(index, index + 2));
-      }
-
-      return acc;
-    }, []);
-
-  const rowsNumber = pairs.length;
-  const height = `${100 / rowsNumber}%`;
-
-  return pairs.map((row, index, arr) => {
-
-    if (index === arr.length - 1 && row.length === 1) {
-      return [{
-        width: '100%',
-        height,
-      }];
-    }
-
-    return row.map(() => ({
-      width: '50%',
-      height,
-    }));
-  }).flat();
-}
+import i18n from '../../18n';
 
 export default function Room() {
   let navigate = useNavigate();
+  const selectedLanguage = i18n.language;
   const { id: roomID } = useParams();
-  const { clients, provideMediaRef, handleLeave, toggleCamera, toggleMicrophone, messages, sendChatMessage } = useWebRTC(roomID);
-  const videoLayout = layout(clients.length);
+  const { clients, provideMediaRef, handleLeave, toggleCamera, toggleMicrophone,
+    messages, sendMessage } = useWebRTC(roomID);
   const [isCameraOn, setCameraOn] = useState(true);
   const [isMicrophoneOn, setMicrophoneOn] = useState(true);
-  const [inputMessage, setInputMessage] = useState('');
   const { t } = useTranslation();
-  const messagesEndRef = useRef(null);
   const { transcript, resetTranscript } = useSpeechRecognition();
   const [subtitlesEnabled, setSubtitlesEnabled] = useState(false);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const [inputMessage, setInputMessage] = useState("");
 
   const handleProvideMediaRef = useCallback((clientID, instance) => {
     provideMediaRef(clientID, instance);
@@ -70,32 +38,21 @@ export default function Room() {
     setMicrophoneOn(prevState => !prevState);
     toggleMicrophone();
   };
-
   const handleSendMessage = () => {
-    if (inputMessage.trim() !== '') {
-      sendChatMessage(inputMessage); // Send the input message using the sendChatMessage function from useWebRTC
-      setInputMessage(''); // Clear the input field after sending the message
-    }
+    sendMessage(inputMessage); // Call the sendMessage function from useWebRTC.js
+    setInputMessage(""); // Clear the input field after sending the message
   };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-  const handleToggleSubtitles = () => {
-    setSubtitlesEnabled(prevState => !prevState);
-  };
-
 
   return (
     <div className="room">
       <div className="room-id">
         {t('room_id')}: {roomID}
-        <button className='btn'>send</button>
+
       </div>
       <div className="call">
         {clients.map((clientID, index) => {
           return (
-            <div key={clientID} style={videoLayout[index]} id={clientID} className="play-window">
+            <div key={clientID} id={clientID} className="play-window">
               <video
                 width="100%"
                 height="100%"
@@ -106,14 +63,14 @@ export default function Room() {
                 playsInline
                 muted={clientID === LOCAL_VIDEO}
               />
-              {clientID !== LOCAL_VIDEO && (
+              {/* {clientID !== LOCAL_VIDEO && (
                 <div>
                   <button onClick={handleToggleSubtitles}>
                     {subtitlesEnabled ? 'Выключить субтитры' : 'Включить субтитры'}
                   </button>
                   {subtitlesEnabled && <div className="subtitles">{transcript}</div>}
                 </div>
-              )}
+              )} */}
               {clientID === LOCAL_VIDEO && (
                 <div>
                   <button onClick={handleExitRoom}>Выйти из комнаты</button>
@@ -129,23 +86,23 @@ export default function Room() {
           );
         })}
       </div>
-      <div className="text-chat">
-        <div className="input-area">
+      <div className='chat'>
+        <div className="messages">
+          {messages.slice(0).reverse().map((message, index) => (
+            <div key={index} className='message'>{message}</div>
+          ))}
+        </div>
+
+        <div className="input-message">
           <input
             type="text"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            placeholder="Type a message"
           />
-          <button onClick={handleSendMessage}>Send</button>
-        </div>
-        <div className="messages">
-          {messages.map((message, index) => (
-            <div key={index} className="message">{message.text}</div>
-          ))}
-          <div ref={messagesEndRef} />
+          <button className='btn-send-message' onClick={handleSendMessage}>Send</button>
         </div>
       </div>
+
     </div>
   );
 }
