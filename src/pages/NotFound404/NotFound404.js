@@ -1,7 +1,13 @@
-function NotFound404(){
-    return(
-        <div>
-            Not Found 404
+import './NotFound.css';
+import { useTranslation } from 'react-i18next';
+
+function NotFound404() {
+
+    const { t } = useTranslation();
+
+    return (
+        <div className='not-found'>
+            {t("not_found")}
         </div>
     )
 }

@@ -1,0 +1,27 @@
+.header{
+    width: 90%;
+    height: 6%;
+    position: fixed;
+    top: 3.5%;
+    left: 50%;
+    transform: translate(-50%, -3.5%);
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user{
+    width: 30%;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+@media (max-width: 767px) {
+    .header{
+
+    }
+}

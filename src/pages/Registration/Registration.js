@@ -2,15 +2,17 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { isEmail } from "validator";
 import './Registration.css';
+import { useTranslation } from "react-i18next";
 
 import AuthService from '../../services/auth.server';
+import LanguageDropdown from '../../components/LangDropdown/LanguageDropdown';
 
 
 const email = (value) => {
   if (!isEmail(value)) {
     return (
       <div className="alert alert-danger" role="alert">
-        This is not a valid email.
+        {/* {t("v_email")} */}
       </div>
     );
   }
@@ -20,7 +22,7 @@ const vusername = (value) => {
   if (value.length < 3 || value.length > 20) {
     return (
       <div className="alert alert-danger" role="alert">
-        The username must be between 3 and 20 characters.
+        {/* {t("v_login")} */}
       </div>
     );
   }
@@ -30,7 +32,17 @@ const vpassword = (value) => {
   if (value.length < 6 || value.length > 40) {
     return (
       <div className="alert alert-danger" role="alert">
-        The password must be between 6 and 40 characters.
+        {/* {t("v_password")} */}
+      </div>
+    );
+  }
+};
+
+const vpassword_confirm = (value) => {
+  if (value.length < 6 || value.length > 40) {
+    return (
+      <div className="alert alert-danger" role="alert">
+        {/* {t("v_confirm_p")} */}
       </div>
     );
   }
@@ -40,6 +52,7 @@ const Registration = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [message, setMessage] = useState('');
   const [successful, setSuccessful] = useState(false);
+  const { t, i18n } = useTranslation();
 
   const onSubmit = (data) => {
     setMessage('');
@@ -63,18 +76,18 @@ const Registration = () => {
 
   return (
     <div>
-
+      <LanguageDropdown/>
       <form onSubmit={handleSubmit(onSubmit)}>
         {!successful && (
           <div className='registration'>
-            <p>Регистрация</p>
+            <p>{t("registration")}</p>
             <div className='right-align'>
               <div className='inputs'>
                 <div className="form-group">
                   <input
                     type="text"
                     name="username"
-                    placeholder='Username'
+                    placeholder={t("login")}
                     {...register('username', { required: true, validate: vusername })}
                   />
                   {errors.username && <p>{errors.username.message}</p>}
@@ -83,6 +96,7 @@ const Registration = () => {
                 <div className="form-group">
                   <input
                     type="text"
+                    placeholder={t("email")}
                     name="email"
                     {...register('email', { required: true, validate: email })}
                   />
@@ -92,6 +106,7 @@ const Registration = () => {
                   <input
                     type="password"
                     name="password"
+                    placeholder={t("password")}
                     {...register('password', { required: true, validate: vpassword })}
                   />
                   {errors.password && <p>{errors.password.message}</p>}
@@ -100,16 +115,17 @@ const Registration = () => {
                   <input
                     type="password"
                     name="password_confirm"
+                    placeholder={t("confirm_p")}
                     {...register('password_confirm', { required: true, validate: vpassword })}
                   />
                   {errors.password && <p>{errors.password.message}</p>}
                 </div>
               </div>
               <div className='link'>
-                <a href='/'>Login</a>
+                <a href='/'>{t("auth")}</a>
               </div>
             </div>
-            <button className="btn">Sign Up</button>
+            <button className="btn">{t("sign_up")}</button>
           </div>
         )
         }

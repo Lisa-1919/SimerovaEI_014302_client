@@ -3,13 +3,45 @@ import freeice from "freeice";
 import socket from "../socket";
 import ACTIONS from "../socket/actions";
 import useStateWithCallback from "./useStateWithCallback";
+import i18n from "../18n";
+
+import axios from 'axios';
+
+const translateMessage = async (message, targetLanguage) => {
+    const encodedParams = new URLSearchParams();
+    encodedParams.set('from', 'auto');
+    encodedParams.set('to', targetLanguage);
+    encodedParams.set('text', message);
+
+    const options = {
+        method: 'POST',
+        url: 'https://google-translate113.p.rapidapi.com/api/v1/translator/text',
+        headers: {
+            'content-type': 'application/x-www-form-urlencoded',
+            'X-RapidAPI-Key': '',
+            'X-RapidAPI-Host': 'google-translate113.p.rapidapi.com'
+        },
+        data: encodedParams,
+    };
+
+    try {
+        const response = await axios.request(options);
+        console.log(response.data);
+        return response.data.trans;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+};
 
 export const LOCAL_VIDEO = 'LOCAL_VIDEO';
 export default function useWebRTC(roomID) {
     const [clients, updateClients] = useStateWithCallback([]);
     const [isCameraOn, setCameraOn] = useState(true);
     const [isMicrophoneOn, setMicrophoneOn] = useState(true);
+    const [messages, setMessages] = useState([]);
 
+    const selectedLanguage = i18n.language;
 
     const addNewClient = useCallback((newClient, cb) => {
         updateClients(list => {
@@ -26,6 +58,43 @@ export default function useWebRTC(roomID) {
     const peerMediaElements = useRef({
         [LOCAL_VIDEO]: null,
     });
+
+    const toggleCamera = useCallback(() => {
+        setCameraOn(prevState => {
+            const videoTrack = localMediaStream.current.getVideoTracks()[0];
+            videoTrack.enabled = !prevState;
+            return !prevState;
+        });
+    }, []);
+
+    const toggleMicrophone = useCallback(() => {
+        setMicrophoneOn(prevState => {
+            const audioTrack = localMediaStream.current.getAudioTracks()[0];
+            audioTrack.enabled = !prevState;
+            return !prevState;
+        });
+    }, []);
+
+    const sendMessage = useCallback(async (message) => {
+        //const translatedMessage = await translateMessage(message, selectedLanguage);
+        // if (translatedMessage) {
+        Object.keys(peerConnections.current).forEach((peerID) => {
+            const dataChannel = peerConnections.current[peerID].createDataChannel('chat');
+            dataChannel.onopen = () => {
+                dataChannel.send(message);
+            };
+        });
+        setMessages(prevMessages => [...prevMessages, message]);
+        //}
+    }, []);
+
+    // Function to handle incoming chat messages
+    const handleIncomingMessage = useCallback(async (message) => {
+        const translatedMessage = await translateMessage(message, selectedLanguage);
+        if (translatedMessage) {
+            setMessages(prevMessages => [...prevMessages, translatedMessage]);
+        }
+    }, []);
 
     useEffect(() => {
         async function handleNewPeer({ peerID, createOffer }) {
@@ -46,11 +115,28 @@ export default function useWebRTC(roomID) {
                 }
             }
 
+            const dataChannel = peerConnections.current[peerID].createDataChannel('chat');
+
+            dataChannel.onopen = () => {
+                console.log('Data channel is open');
+            };
+
+            dataChannel.onmessage = (event) => {
+                handleIncomingMessage(event.data);
+            };
+
+            peerConnections.current[peerID].ondatachannel = (event) => {
+                const receiveChannel = event.channel;
+                receiveChannel.onmessage = (event) => {
+                    handleIncomingMessage(event.data);
+                };
+            };
+
             let tracksNumber = 0;
             peerConnections.current[peerID].ontrack = ({ streams: [remoteStream] }) => {
                 tracksNumber++
 
-                if (tracksNumber === 2) { // video & audio tracks received
+                if (tracksNumber === 2) {
                     tracksNumber = 0;
                     addNewClient(peerID, () => {
                         if (peerMediaElements.current[peerID]) {
@@ -161,6 +247,7 @@ export default function useWebRTC(roomID) {
                         height: 720
                     }
                 });
+
             } catch (err) {
                 console.error("Error capturing local stream", err);
                 return;
@@ -197,21 +284,23 @@ export default function useWebRTC(roomID) {
         socket.emit(ACTIONS.LEAVE);
     }, []);
 
-    // Функция для отправки аудио данных на сервер
-    const sendAudioData = (data, targetLanguage) => {
-        socket.emit("audio_data", data, targetLanguage);
-    };
-
-    // Обработчик для получения переведенных данных от сервера
-    socket.on("translated_audio_data", (translatedData) => {
-        // Обработка переведенных данных
-    });
 
 
+    useEffect(() => {
+        socket.on(ACTIONS.RECEIVE_MESSAGE, handleIncomingMessage);
+
+        return () => {
+            socket.off(ACTIONS.RECEIVE_MESSAGE);
+        }
+    }, []);
 
     return {
         clients,
         provideMediaRef,
-        handleLeave
+        handleLeave,
+        toggleCamera,
+        toggleMicrophone,
+        messages, // Return the chat messages
+        sendMessage, // Return the function to send chat messages
     };
 }
