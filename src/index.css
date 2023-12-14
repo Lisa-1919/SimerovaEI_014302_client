@@ -24,11 +24,29 @@ body {
   background-color: transparent;
   padding: 0.5em 0.7em;
   border-radius: 23px;
-  border: 3px solid #6F8CF5;
+  border: 2px solid #6F8CF5;
   color: #BFA181;
+  cursor: pointer;
 }
 
+input {
+  width: 318.635px;
+  height: 41.493px;
+  border-top: 0;
+  border-radius: 34px;
+  border-right: 1px solid #BFA181;
+  border-bottom: 2px solid #BFA181;
+  border-left: 1px solid #BFA181;
+  color: #BFA181;
+  background: transparent;
 
+  font-family: 'Comfortaa';
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  text-align: center;
+}
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',

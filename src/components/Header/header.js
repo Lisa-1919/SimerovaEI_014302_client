@@ -4,11 +4,13 @@ import AuthService from '../../services/auth.server';
 import { useNavigate } from 'react-router-dom';
 import LanguageDropdown from "../LangDropdown/LanguageDropdown";
 import { useTranslation } from "react-i18next";
+import { RxExit } from "react-icons/rx";
 
 
 const Header = () => {
     const navigate = useNavigate();
     const { t} = useTranslation();
+    
     const handleLogout = () => {
         AuthService.logout();
         navigate('/');
@@ -26,8 +28,7 @@ const Header = () => {
                     <a href='/settings'>{t("settings")}</a>
                 </div>
                 <div className='logout'>
-
-                    <button><img src='../../media/exit.png' alt="logout" onClick={handleLogout} className="logout-img"/></button>
+                    <button onClick={handleLogout} className="btn-logout"><RxExit className="icon"/></button>
                 </div>
             </div>
         </div>

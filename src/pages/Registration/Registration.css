@@ -33,14 +33,14 @@
     align-items: center;
 }
 
-input {
+.inputs input {
     width: 318.635px;
     height: 41.493px;
     border-top: 0;
     border-radius: 34px;
-    border-right: 2px solid #BFA181;
-    border-bottom: 3px solid #BFA181;
-    border-left: 2px solid #BFA181;
+    border-right: 1px solid #BFA181;
+    border-bottom: 2px solid #BFA181;
+    border-left: 1px solid #BFA181;
     color: #BFA181;
     background: transparent;
 
@@ -50,6 +50,11 @@ input {
     font-weight: 400;
     line-height: normal;
     text-align: center;
+}
+
+input:focus{
+    outline: none;
+border: 1px solid #BFA181;
 }
 
 p {

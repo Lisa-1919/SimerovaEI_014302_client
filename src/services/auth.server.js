@@ -86,6 +86,21 @@ class AuthService {
         return response.data;
       });
   }
+
+  saveCall(callInfo) {
+    console.log(callInfo);
+    // const user = JSON.parse(localStorage.getItem('user'));
+    // const token = user.accessToken;
+
+    // return axios.post(API_URL + 'save-call', callInfo, {
+    //   headers: {
+    //     Authorization: `Bearer ${token}`,
+    //   },
+    // })
+    //   .then(response => {
+    //     return response.data;
+    //   });
+  }
 }
 
 export default new AuthService();

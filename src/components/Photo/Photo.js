@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './photo.css';
 import { useTranslation } from "react-i18next";
 import authServer from '../../services/auth.server';
+import { IoAddOutline } from "react-icons/io5";
 
 const Photo = () => {
     const { t } = useTranslation();

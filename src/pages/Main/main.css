@@ -29,5 +29,21 @@
     justify-content: space-between;
 }
 .join input{
-    margin-right: 2%;
+    margin-right: 2%; 
+    width: 318.635px;
+    height: 41.493px;
+    border-top: 0;
+    border-radius: 34px;
+    border-right: 1px solid #BFA181;
+    border-bottom: 2px solid #BFA181;
+    border-left: 1px solid #BFA181;
+    color: #BFA181;
+    background: transparent;
+
+    font-family: 'Comfortaa';
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-align: center;
 }

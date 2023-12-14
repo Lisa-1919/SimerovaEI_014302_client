@@ -4,7 +4,7 @@ import socket from "../socket";
 import ACTIONS from "../socket/actions";
 import useStateWithCallback from "./useStateWithCallback";
 import i18n from "../18n";
-
+import AuthService from "../services/auth.server";
 import axios from 'axios';
 
 const translateMessage = async (message, targetLanguage) => {
@@ -34,6 +34,7 @@ const translateMessage = async (message, targetLanguage) => {
     }
 };
 
+
 export const LOCAL_VIDEO = 'LOCAL_VIDEO';
 export default function useWebRTC(roomID) {
     const [clients, updateClients] = useStateWithCallback([]);
@@ -42,6 +43,24 @@ export default function useWebRTC(roomID) {
     const [messages, setMessages] = useState([]);
 
     const selectedLanguage = i18n.language;
+
+    const [translationLanguage, setTranslationLanguage] = useState(i18n.language);
+    const [startTime, setStartTime] = useState(null);
+    const [endTime, setEndTime] = useState(null);
+    const [secondParticipantInfo, setSecondParticipantInfo] = useState(null);
+
+
+    const saveCallInfo = useCallback(() => {
+        const callInfo = {
+            startTime: startTime, // Замените startTime на соответствующую переменную, содержащую время начала звонка
+            endTime: endTime, // Замените endTime на соответствующую переменную, содержащую время окончания звонка
+            translationLanguage: translationLanguage, // Замените translationLanguage на соответствующую переменную, содержащую язык перевода
+            secondParticipant: secondParticipantInfo, // Замените secondParticipantInfo на соответствующую переменную, содержащую информацию о втором участнике
+        };
+
+        AuthService.saveCall(callInfo);
+    }, [startTime, endTime, translationLanguage, secondParticipantInfo]);
+
 
     const addNewClient = useCallback((newClient, cb) => {
         updateClients(list => {
@@ -86,7 +105,7 @@ export default function useWebRTC(roomID) {
         });
         setMessages(prevMessages => [...prevMessages, message]);
         //}
-    }, []);
+    }, [translationLanguage]);
 
     // Function to handle incoming chat messages
     const handleIncomingMessage = useCallback(async (message) => {
@@ -94,7 +113,7 @@ export default function useWebRTC(roomID) {
         if (translatedMessage) {
             setMessages(prevMessages => [...prevMessages, translatedMessage]);
         }
-    }, []);
+    }, [translationLanguage]);
 
     useEffect(() => {
         async function handleNewPeer({ peerID, createOffer }) {
@@ -171,6 +190,8 @@ export default function useWebRTC(roomID) {
                     peerID,
                     sessionDescription: offer,
                 });
+                setStartTime(Date.now());
+                setSecondParticipantInfo(peerID);
             }
         }
 
@@ -281,6 +302,8 @@ export default function useWebRTC(roomID) {
     }, []);
 
     const handleLeave = useCallback(() => {
+        setEndTime(Date.now());
+        saveCallInfo();
         socket.emit(ACTIONS.LEAVE);
     }, []);
 

@@ -6,6 +6,10 @@ import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import i18n from '../../18n';
+import { PiCamera, PiCameraSlash, PiMicrophone, PiMicrophoneSlash } from "react-icons/pi";
+import { MdCallEnd } from "react-icons/md";
+import { IoRocketSharp } from "react-icons/io5";
+import { RiUserShared2Line } from "react-icons/ri";
 
 export default function Room() {
   let navigate = useNavigate();
@@ -19,6 +23,7 @@ export default function Room() {
   const { transcript, resetTranscript } = useSpeechRecognition();
   const [subtitlesEnabled, setSubtitlesEnabled] = useState(false);
   const [inputMessage, setInputMessage] = useState("");
+  const [textareaHeight, setTextareaHeight] = useState("auto");
 
   const handleProvideMediaRef = useCallback((clientID, instance) => {
     provideMediaRef(clientID, instance);
@@ -42,6 +47,12 @@ export default function Room() {
     sendMessage(inputMessage); // Call the sendMessage function from useWebRTC.js
     setInputMessage(""); // Clear the input field after sending the message
   };
+
+  const handleTextareaChange = (event) => {
+    event.target.style.height = "auto"; // Reset the height to auto
+    event.target.style.height = event.target.scrollHeight + "px"; // Set the height to fit the content
+  };
+  
 
   return (
     <div className="room">
@@ -72,13 +83,13 @@ export default function Room() {
                 </div>
               )} */}
               {clientID === LOCAL_VIDEO && (
-                <div>
-                  <button onClick={handleExitRoom}>Выйти из комнаты</button>
-                  <button onClick={handleToggleCamera}>
-                    {isCameraOn ? 'Выключить камеру' : 'Включить камеру'}
+                <div className='call-buttons'>
+                  <button className='btn-action' onClick={handleExitRoom} ><MdCallEnd className='icon' id='call-icon' /></button>
+                  <button className='btn-action' onClick={handleToggleCamera}>
+                    {isCameraOn ? <PiCamera className='icon' /> : <PiCameraSlash className='icon' />}
                   </button>
-                  <button onClick={handleToggleMicrophone}>
-                    {isMicrophoneOn ? 'Выключить микрофон' : 'Включить микрофон'}
+                  <button className='btn-action' onClick={handleToggleMicrophone}>
+                    {isMicrophoneOn ? <PiMicrophone className='icon' /> : <PiMicrophoneSlash className='icon' />}
                   </button>
                 </div>
               )}
@@ -92,14 +103,16 @@ export default function Room() {
             <div key={index} className='message'>{message}</div>
           ))}
         </div>
-
         <div className="input-message">
-          <input
-            type="text"
+          <textarea
             value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
+            onChange={(e) => {
+              setInputMessage(e.target.value);
+              handleTextareaChange(e);
+            }}
+            style={{ height: textareaHeight }}
           />
-          <button className='btn-send-message' onClick={handleSendMessage}>Send</button>
+          <button className='btn-send-message' onClick={handleSendMessage}><IoRocketSharp className='icon-send' /></button>
         </div>
       </div>
 
