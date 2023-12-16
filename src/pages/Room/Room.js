@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState} from 'react';
 import { useParams, useNavigate } from 'react-router';
 import useWebRTC, { LOCAL_VIDEO } from '../../hooks/useWebRTC';
 import './room.css';
@@ -9,110 +9,10 @@ import i18n from '../../18n';
 import { PiCamera, PiCameraSlash, PiMicrophone, PiMicrophoneSlash } from "react-icons/pi";
 import { MdCallEnd } from "react-icons/md";
 import { IoRocketSharp } from "react-icons/io5";
-import { RiUserShared2Line } from "react-icons/ri";
-import TextTransition, { presets } from 'react-text-transition';
-import { Email } from '../../components/Email/Email';
+// import { RiUserShared2Line } from "react-icons/ri";
+// import { Email } from '../../components/Email/Email';
 import authServer from '../../services/auth.server';
-
-const translate = async (message, targetLanguage) => {
-  const encodedParams = new URLSearchParams();
-  encodedParams.set('from', 'auto');
-  encodedParams.set('to', targetLanguage);
-  encodedParams.set('text', message);
-
-  const options = {
-      method: 'POST',
-      url: 'https://google-translate113.p.rapidapi.com/api/v1/translator/text',
-      headers: {
-          'content-type': 'application/x-www-form-urlencoded',
-          'X-RapidAPI-Key': '459c909060msh259d284d0105b54p151393jsnbb0570bf2901',
-          'X-RapidAPI-Host': 'google-translate113.p.rapidapi.com'
-      },
-      data: encodedParams,
-  };
-
-  try {
-      const response = await axios.request(options);
-      console.log(response.data);
-      return response.data.trans;
-  } catch (error) {
-      console.error(error);
-      return null;
-  }
-};
-
-const SpeechRecognitionVideo = ({ clientID, isLocalVideo, language }) => {
-  const [message, setMessage] = useState('');
-  const {
-      transcript,
-      interimTranscript,
-      finalTranscript,
-      translatedText,
-      resetTranscript,
-      listening,
-  } = useSpeechRecognition();
-
-  useEffect(() => {
-      if (finalTranscript !== '') {
-          console.log('Got final result:', finalTranscript);
-      }
-  }, [interimTranscript, finalTranscript]);
-
-  const startListening = () => {
-      SpeechRecognition.startListening({
-          continuous: true,
-          language: 'ru-RU',
-      });
-  };
-
-  const stopListening = () => {
-      SpeechRecognition.stopListening();
-  };
-
-  //   useEffect(() => {
-  //     const interval = setInterval(() => {
-  //       if (finalTranscript !== '') {
-  //         console.log('Got final result:', finalTranscript);
-  //         // translate(finalTranscript, language)
-  //         //   .then(translatedText => {
-  //         //     console.log('Translated text:', translatedText);
-  //         //     // Do something with the translated text
-  //         //   })
-  //         //   .catch(error => {
-  //         //     console.error('Translation error:', error);
-  //         //   });
-  //       }
-  //     }, 5000);
-
-  //     return () => {
-  //       clearInterval(interval);
-  //     };
-  //   }, [finalTranscript, language]);
-
-  return (
-      <div>
-          <div>
-              <span>
-                  Listening:
-                  {' '}
-                  {listening ? 'on' : 'off'}
-              </span>
-              <div>
-                  <button type="button" onClick={resetTranscript}>Reset</button>
-
-                  <button type="button" onClick={startListening}>Start Listening</button>
-
-                  <button type="button" onClick={stopListening}>Stop Listening</button>
-              </div>
-          </div>
-          <div>
-              <span>{transcript}</span>
-          </div>
-      </div>
-  );
-};
-
-
+import SpeechRecognitionVideo from './SpeechRecogintion';
 
 export default function Room() {
   let navigate = useNavigate();
@@ -214,17 +114,7 @@ export default function Room() {
                 muted={clientID === LOCAL_VIDEO}
               />
               {clientID !== LOCAL_VIDEO && (
-                <div className='transcript'>
-                  <button onClick={handleToggleSubtitles}>
-                    {subtitlesEnabled ? 'Выключить субтитры' : 'Включить субтитры'}
-                  </button>
-                  <div className="subtitles">
-                    <TextTransition
-                      text={currentSubtitle}
-                      springConfig={presets.gentle}
-                    />
-                  </div>
-                </div>
+                <SpeechRecognitionVideo clientID={clientID} isLocalVideo={false} targetLanguage={i18n.selectedLanguage} />
               )}
 
               {clientID === LOCAL_VIDEO && (

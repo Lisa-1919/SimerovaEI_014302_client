@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import axios from 'axios';
-import './speech-recognition.css';
+import './speech-recognition-video.css';
 
 const translate = async (message, targetLanguage) => {
     const encodedParams = new URLSearchParams();
-    encodedParams.set('from', 'auto');
-    encodedParams.set('to', targetLanguage);
+    encodedParams.set('from', 'ru');
+    encodedParams.set('to', 'en');
     encodedParams.set('text', message);
 
     const options = {
@@ -30,7 +30,7 @@ const translate = async (message, targetLanguage) => {
     }
 };
 
-const SpeechRecognitionVideo = ({ clientID, isLocalVideo, language }) => {
+const SpeechRecognitionVideo = ({ clientID, isLocalVideo, targetLanguage }) => {
     const [message, setMessage] = useState('');
     const {
         transcript,
@@ -41,13 +41,15 @@ const SpeechRecognitionVideo = ({ clientID, isLocalVideo, language }) => {
         listening,
     } = useSpeechRecognition();
 
-    useEffect(() => {
-        if (finalTranscript !== '') {
-            console.log('Got final result:', finalTranscript);
-        }
-    }, [interimTranscript, finalTranscript]);
+    // useEffect(() => {
+    //     if (finalTranscript !== '') {
+    //         console.log('Got final result:', finalTranscript);
+    //         translateAndDisplay(finalTranscript, language);
+    //     }
+    // }, [interimTranscript, finalTranscript]);
 
     const startListening = () => {
+        console.log(targetLanguage);
         SpeechRecognition.startListening({
             continuous: true,
             language: 'ru-RU',
@@ -58,27 +60,31 @@ const SpeechRecognitionVideo = ({ clientID, isLocalVideo, language }) => {
         SpeechRecognition.stopListening();
     };
 
-    //   useEffect(() => {
-    //     const interval = setInterval(() => {
-    //       if (finalTranscript !== '') {
-    //         console.log('Got final result:', finalTranscript);
-    //         // translate(finalTranscript, language)
-    //         //   .then(translatedText => {
-    //         //     console.log('Translated text:', translatedText);
-    //         //     // Do something with the translated text
-    //         //   })
-    //         //   .catch(error => {
-    //         //     console.error('Translation error:', error);
-    //         //   });
-    //       }
-    //     }, 5000);
+    const translateAndDisplay = async (text, targetLanguage) => {
+        if (text.trim() !== '') {
+            try {
+                const translatedText = await translate(text, targetLanguage);
+                console.log('Translated text:', translatedText);
+                setMessage(translatedText);
+            } catch (error) {
+                console.error('Translation error:', error);
+            }
+        }
+    };
 
-    //     return () => {
-    //       clearInterval(interval);
-    //     };
-    //   }, [finalTranscript, language]);
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (finalTranscript !== '') {
+                console.log('Got final result:', finalTranscript);
+                translateAndDisplay(finalTranscript, "sp");
+                resetTranscript();
+            }
+        }, 5000);
 
- 
+        return () => {
+            clearInterval(interval);
+        };
+    }, [finalTranscript, targetLanguage]);
 
     return (
         <div>
@@ -97,7 +103,10 @@ const SpeechRecognitionVideo = ({ clientID, isLocalVideo, language }) => {
                 </div>
             </div>
             <div>
-                <span>{transcript}</span>
+                <span className='sub'>{finalTranscript}</span>
+            </div>
+            <div>
+                <span className='sub'>{message}</span>
             </div>
         </div>
     );
