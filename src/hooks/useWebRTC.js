@@ -6,6 +6,7 @@ import useStateWithCallback from "./useStateWithCallback";
 import i18n from "../18n";
 import AuthService from "../services/auth.server";
 import axios from "axios";
+import SpeechRecognition from 'react-speech-recognition';
 
 const translateMessage = async (message, targetLanguage) => {
     const encodedParams = new URLSearchParams();
@@ -278,6 +279,25 @@ export default function useWebRTC(roomID) {
                     localVideoElement.srcObject = localMediaStream.current;
                 }
             });
+
+            // SpeechRecognition.startListening({
+            //     continuous: true,
+            //     language: 'ru-Ru',
+            //     interimResults: true,
+            //     maxAlternatives: 1,
+            //     audioBitsPerSecond: 128000,
+            //     onResult: (result) => {
+            //       // Обработка распознанной речи
+            //       console.log('Recognized speech:', result);
+            //     },
+            //     onEnd: () => {
+            //       console.log('Speech recognition ended');
+            //     },
+            //     onError: (error) => {
+            //       console.error('Speech recognition error:', error);
+            //     }
+            //   });
+              
         }
 
         startCapture()
@@ -287,7 +307,7 @@ export default function useWebRTC(roomID) {
         return () => {
             if (localMediaStream.current) {
                 localMediaStream.current.getTracks().forEach(track => track.stop());
-
+                // SpeechRecognition.stopListening();
                 socket.emit(ACTIONS.LEAVE);
             }
         };
