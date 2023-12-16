@@ -6,8 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from "react-i18next";
 import LanguageDropdown from '../../components/LangDropdown/LanguageDropdown';
 
-
-
 const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [message, setMessage] = useState('');

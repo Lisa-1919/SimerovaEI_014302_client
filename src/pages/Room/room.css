@@ -29,6 +29,7 @@
     height: 70vh;
     margin: 10px;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
 }
@@ -148,4 +149,16 @@ margin: 2px;
     border-radius: 50%;
     border: none;
     cursor: pointer;
+}
+
+.transcript{
+
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.subtitles{
+    width: 80%;
+    height: 80%;
+    color: white;
 }

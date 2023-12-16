@@ -10,6 +10,7 @@ import { I18nextProvider } from 'react-i18next';
 import i18n from './18n';
 import SubtitleGenerator from './pages/SubtitleGenerator';
 import Settings from './pages/Settings/Settings';
+import { Email } from './components/Email/Email';
 
 function App() {
   return (
@@ -19,11 +20,12 @@ function App() {
           <Routes>
             <Route exact path="/" element={<Login />} />
             <Route exact path="/registration" element={<Registration />} />
-            {/* <Route element={<AuthGuard />}> */}
+            <Route element={<AuthGuard />}>
               <Route exact path="/room/:id" element={<Room />} />
               <Route exact path="/settings" element={<Settings />} />
               <Route exact path="/home" element={<Main />} />
-            {/* </Route> */}
+              <Route exact path="/share" element={<Email />} />
+            </Route>
             <Route path='*' element={<NotFound404 />} />
           </Routes>
         </I18nextProvider>

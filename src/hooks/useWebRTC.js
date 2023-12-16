@@ -5,7 +5,7 @@ import ACTIONS from "../socket/actions";
 import useStateWithCallback from "./useStateWithCallback";
 import i18n from "../18n";
 import AuthService from "../services/auth.server";
-import axios from 'axios';
+import axios from "axios";
 
 const translateMessage = async (message, targetLanguage) => {
     const encodedParams = new URLSearchParams();
@@ -17,12 +17,12 @@ const translateMessage = async (message, targetLanguage) => {
         method: 'POST',
         url: 'https://google-translate113.p.rapidapi.com/api/v1/translator/text',
         headers: {
-            'content-type': 'application/x-www-form-urlencoded',
-            'X-RapidAPI-Key': '',
-            'X-RapidAPI-Host': 'google-translate113.p.rapidapi.com'
+          'content-type': 'application/x-www-form-urlencoded',
+          'X-RapidAPI-Key': '459c909060msh259d284d0105b54p151393jsnbb0570bf2901',
+          'X-RapidAPI-Host': 'google-translate113.p.rapidapi.com'
         },
         data: encodedParams,
-    };
+      };
 
     try {
         const response = await axios.request(options);
@@ -47,19 +47,18 @@ export default function useWebRTC(roomID) {
     const [translationLanguage, setTranslationLanguage] = useState(i18n.language);
     const [startTime, setStartTime] = useState(null);
     const [endTime, setEndTime] = useState(null);
-    const [secondParticipantInfo, setSecondParticipantInfo] = useState(null);
 
 
-    const saveCallInfo = useCallback(() => {
-        const callInfo = {
-            startTime: startTime, // Замените startTime на соответствующую переменную, содержащую время начала звонка
-            endTime: endTime, // Замените endTime на соответствующую переменную, содержащую время окончания звонка
-            translationLanguage: translationLanguage, // Замените translationLanguage на соответствующую переменную, содержащую язык перевода
-            secondParticipant: secondParticipantInfo, // Замените secondParticipantInfo на соответствующую переменную, содержащую информацию о втором участнике
-        };
+    // const saveCallInfo = useCallback(() => {
+    //     const callInfo = {
+    //         startTime: startTime, // Замените startTime на соответствующую переменную, содержащую время начала звонка
+    //         endTime: endTime, // Замените endTime на соответствующую переменную, содержащую время окончания звонка
+    //         translationLanguage: translationLanguage, // Замените translationLanguage на соответствующую переменную, содержащую язык перевода
+    //         secondParticipant: secondParticipantInfo, // Замените secondParticipantInfo на соответствующую переменную, содержащую информацию о втором участнике
+    //     };
 
-        AuthService.saveCall(callInfo);
-    }, [startTime, endTime, translationLanguage, secondParticipantInfo]);
+    //     AuthService.saveCall(callInfo);
+    // }, [startTime, endTime, translationLanguage, secondParticipantInfo]);
 
 
     const addNewClient = useCallback((newClient, cb) => {
@@ -95,8 +94,6 @@ export default function useWebRTC(roomID) {
     }, []);
 
     const sendMessage = useCallback(async (message) => {
-        //const translatedMessage = await translateMessage(message, selectedLanguage);
-        // if (translatedMessage) {
         Object.keys(peerConnections.current).forEach((peerID) => {
             const dataChannel = peerConnections.current[peerID].createDataChannel('chat');
             dataChannel.onopen = () => {
@@ -104,10 +101,8 @@ export default function useWebRTC(roomID) {
             };
         });
         setMessages(prevMessages => [...prevMessages, message]);
-        //}
     }, [translationLanguage]);
 
-    // Function to handle incoming chat messages
     const handleIncomingMessage = useCallback(async (message) => {
         const translatedMessage = await translateMessage(message, selectedLanguage);
         if (translatedMessage) {
@@ -174,6 +169,7 @@ export default function useWebRTC(roomID) {
                             }, 1000);
                         }
                     });
+
                 }
             }
 
@@ -190,8 +186,8 @@ export default function useWebRTC(roomID) {
                     peerID,
                     sessionDescription: offer,
                 });
-                setStartTime(Date.now());
-                setSecondParticipantInfo(peerID);
+                // setStartTime(Date.now());
+                // setSecondParticipantInfo(peerID);
             }
         }
 
@@ -302,8 +298,8 @@ export default function useWebRTC(roomID) {
     }, []);
 
     const handleLeave = useCallback(() => {
-        setEndTime(Date.now());
-        saveCallInfo();
+        // setEndTime(Date.now());
+        // saveCallInfo();
         socket.emit(ACTIONS.LEAVE);
     }, []);
 

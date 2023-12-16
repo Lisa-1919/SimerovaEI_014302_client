@@ -10,9 +10,13 @@ import { PiCamera, PiCameraSlash, PiMicrophone, PiMicrophoneSlash } from "react-
 import { MdCallEnd } from "react-icons/md";
 import { IoRocketSharp } from "react-icons/io5";
 import { RiUserShared2Line } from "react-icons/ri";
+import TextTransition, { presets } from 'react-text-transition';
+import { Email } from '../../components/Email/Email';
+import authServer from '../../services/auth.server';
 
 export default function Room() {
   let navigate = useNavigate();
+  const user = authServer.getCurrentUser();
   const selectedLanguage = i18n.language;
   const { id: roomID } = useParams();
   const { clients, provideMediaRef, handleLeave, toggleCamera, toggleMicrophone,
@@ -20,8 +24,11 @@ export default function Room() {
   const [isCameraOn, setCameraOn] = useState(true);
   const [isMicrophoneOn, setMicrophoneOn] = useState(true);
   const { t } = useTranslation();
+
   const { transcript, resetTranscript } = useSpeechRecognition();
   const [subtitlesEnabled, setSubtitlesEnabled] = useState(false);
+  const [currentSubtitle, setCurrentSubtitle] = useState('');
+
   const [inputMessage, setInputMessage] = useState("");
   const [textareaHeight, setTextareaHeight] = useState("auto");
 
@@ -44,21 +51,53 @@ export default function Room() {
     toggleMicrophone();
   };
   const handleSendMessage = () => {
-    sendMessage(inputMessage); // Call the sendMessage function from useWebRTC.js
-    setInputMessage(""); // Clear the input field after sending the message
+    sendMessage(inputMessage);
+    setInputMessage("");
   };
 
   const handleTextareaChange = (event) => {
-    event.target.style.height = "auto"; // Reset the height to auto
-    event.target.style.height = event.target.scrollHeight + "px"; // Set the height to fit the content
+    event.target.style.height = "auto";
+    event.target.style.height = event.target.scrollHeight + "px";
   };
-  
+
+
+  const handleToggleSubtitles = () => {
+    setSubtitlesEnabled(prevState => !prevState);
+  };
+
+  useEffect(() => {
+    if (subtitlesEnabled) {
+      SpeechRecognition.language = selectedLanguage;
+      SpeechRecognition.startListening();
+    } else {
+      SpeechRecognition.stopListening();
+      resetTranscript();
+    }
+
+  }, [subtitlesEnabled, resetTranscript]);
+
+  useEffect(() => {
+    if (subtitlesEnabled) {
+      setCurrentSubtitle(transcript);
+    } else {
+      setCurrentSubtitle('');
+    } console.log(transcript);
+  }, [subtitlesEnabled, transcript]);
+
+  const handleShareRoom = () => {
+    navigate('/share', { state: { senderEmail: user.email, roomID } });
+  };
+
 
   return (
     <div className="room">
-      <div className="room-id">
-        {t('room_id')}: {roomID}
-
+      <div className="share-room">
+        <div className='room-id'>
+          {t('room_id')}: {roomID}
+        </div>
+        <div className='send-email'>
+          <button onClick={handleShareRoom}>Share</button>
+        </div>
       </div>
       <div className="call">
         {clients.map((clientID, index) => {
@@ -74,14 +113,20 @@ export default function Room() {
                 playsInline
                 muted={clientID === LOCAL_VIDEO}
               />
-              {/* {clientID !== LOCAL_VIDEO && (
-                <div>
+              {clientID !== LOCAL_VIDEO && (
+                <div className='transcript'>
                   <button onClick={handleToggleSubtitles}>
                     {subtitlesEnabled ? 'Выключить субтитры' : 'Включить субтитры'}
                   </button>
-                  {subtitlesEnabled && <div className="subtitles">{transcript}</div>}
+                  <div className="subtitles">
+                    <TextTransition
+                      text={currentSubtitle}
+                      springConfig={presets.gentle}
+                    />
+                  </div>
                 </div>
-              )} */}
+              )}
+
               {clientID === LOCAL_VIDEO && (
                 <div className='call-buttons'>
                   <button className='btn-action' onClick={handleExitRoom} ><MdCallEnd className='icon' id='call-icon' /></button>
