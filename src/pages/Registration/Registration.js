@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { isEmail } from "validator";
 import './Registration.css';
 import { useTranslation } from "react-i18next";
-
+import { useNavigate } from 'react-router-dom';
 import AuthService from '../../services/auth.server';
 import LanguageDropdown from '../../components/LangDropdown/LanguageDropdown';
 
@@ -53,6 +53,7 @@ const Registration = () => {
   const [message, setMessage] = useState('');
   const [successful, setSuccessful] = useState(false);
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
 
   const onSubmit = (data) => {
     setMessage('');
@@ -64,6 +65,7 @@ const Registration = () => {
           (response) => {
             setMessage(response.data.message);
             setSuccessful(true);
+            navigate('/')
           },
           (error) => {
             const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();

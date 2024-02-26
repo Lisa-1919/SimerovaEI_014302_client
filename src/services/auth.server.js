@@ -90,6 +90,31 @@ class AuthService {
       });
   }
 
+  sendEmail (emailTo, senderEmail, message) {
+    const options = {
+      method: 'POST',
+      url: 'https://mail-sender-api1.p.rapidapi.com/',
+      headers: {
+        'content-type': 'application/json',
+        'X-RapidAPI-Key': '459c909060msh259d284d0105b54p151393jsnbb0570bf2901',
+        'X-RapidAPI-Host': 'mail-sender-api1.p.rapidapi.com'
+      },
+      data: {
+        sendto: emailTo,
+        name: 'Voiceger',
+        replyTo: senderEmail,
+        ishtml: 'false',
+        title: 'Call',
+        body: message
+      }
+    };
+  
+    return axios.request(options)
+      .then(response => response.data)
+      .catch(error => error);
+  };
+
+
 
   changeLanguage(username, language) {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -114,7 +139,7 @@ class AuthService {
     console.log(token);
     const formData = new FormData();
     formData.append('image', image);
-  
+
     return axios.post(API_URL + "upload_img", formData, {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -125,11 +150,10 @@ class AuthService {
         return response.data;
       });
   }
-  
 
-
-  saveCall(callInfo) {
-    console.log(callInfo);
+  saveCall(startTime, endTime) {
+    console.log(startTime);
+    console.log(endTime);
     // const user = JSON.parse(localStorage.getItem('user'));
     // const token = user.accessToken;
 

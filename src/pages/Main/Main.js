@@ -20,13 +20,12 @@ function Main() {
         <div>
             <Header />
             <div className='main'>
-                {/* <div className='user-info'>
-                    <Photo />
+                <div className='user-info'>
                     <div className='text'>
                         <p className='user-data-text'>{user.username}</p>
                         <p className='user-data-text'>{user.email}</p>
                     </div>
-                </div> */}
+                </div>
 
                 <div className='room_actions'>
 

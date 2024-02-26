@@ -1,4 +1,4 @@
-import React, { useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import useWebRTC, { LOCAL_VIDEO } from '../../hooks/useWebRTC';
 import './room.css';
@@ -9,10 +9,12 @@ import i18n from '../../18n';
 import { PiCamera, PiCameraSlash, PiMicrophone, PiMicrophoneSlash } from "react-icons/pi";
 import { MdCallEnd } from "react-icons/md";
 import { IoRocketSharp } from "react-icons/io5";
-// import { RiUserShared2Line } from "react-icons/ri";
-// import { Email } from '../../components/Email/Email';
+import { RiUserSharedFill } from "react-icons/ri";
 import authServer from '../../services/auth.server';
 import SpeechRecognitionVideo from './SpeechRecogintion';
+import { Email } from '../../components/Email/Email';
+import { AiOutlineClose } from 'react-icons/ai';
+
 
 export default function Room() {
   let navigate = useNavigate();
@@ -32,11 +34,26 @@ export default function Room() {
   const [inputMessage, setInputMessage] = useState("");
   const [textareaHeight, setTextareaHeight] = useState("auto");
 
+  const [startTime, setStartTime] = useState(null);
+  const [endTime, setEndTime] = useState(null);
+
+  const saveCallInfo = useCallback(() => {
+    const callInfo = {
+      startTime: startTime,
+      endTime: endTime,
+      roomID: roomID,
+    };
+
+    authServer.saveCall(callInfo);
+  }, [startTime, endTime]);
+
   const handleProvideMediaRef = useCallback((clientID, instance) => {
     provideMediaRef(clientID, instance);
   }, [provideMediaRef]);
 
   const handleExitRoom = () => {
+    setEndTime(new Date());
+    authServer.saveCall(startTime, endTime);
     handleLeave();
     navigate('/home');
   };
@@ -84,21 +101,40 @@ export default function Room() {
     } console.log(transcript);
   }, [subtitlesEnabled, transcript]);
 
+  const [showEmailForm, setShowEmailForm] = React.useState(false);
+  const [emailSentMessage, setEmailSentMessage] = React.useState('');
+
   const handleShareRoom = () => {
-    navigate('/share', { state: { senderEmail: user.email, roomID } });
+    setShowEmailForm(true);
+  };
+  const handleCloseForm = () => {
+    setShowEmailForm(false);
+  };
+  
+
+  const handleEmailSent = () => {
+    setEmailSentMessage(emailSentMessage);
+    setShowEmailForm(false);
   };
 
 
   return (
     <div className="room">
       <div className="share-room">
-        <div className='room-id'>
-          {t('room_id')}: {roomID}
-        </div>
-        <div className='send-email'>
-          <button onClick={handleShareRoom}>Share</button>
-        </div>
+        {showEmailForm ? (
+          <div className='share-email-form'>
+            <Email roomID={roomID} senderEmail={user.email} onEmailSent={handleEmailSent} />
+            <button onClick={handleCloseForm} className='btn-close'><AiOutlineClose className='icon-close' /></button>
+          </div>
+        ) : (
+          <div className='room-id'>
+            {t('room_id')}: {roomID}
+            <button onClick={handleShareRoom} className='btn-share'><RiUserSharedFill className='icon-share' /></button>
+          </div>
+        )}
+        {emailSentMessage && <div>{emailSentMessage}</div>}
       </div>
+
       <div className="call">
         {clients.map((clientID, index) => {
           return (
@@ -114,7 +150,7 @@ export default function Room() {
                 muted={clientID === LOCAL_VIDEO}
               />
               {clientID !== LOCAL_VIDEO && (
-                <SpeechRecognitionVideo clientID={clientID} isLocalVideo={false} targetLanguage={i18n.selectedLanguage} />
+                <SpeechRecognitionVideo clientID={clientID} isLocalVideo={false} targetLanguage={user.language} />
               )}
 
               {clientID === LOCAL_VIDEO && (

@@ -3,10 +3,10 @@ import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognitio
 import axios from 'axios';
 import './speech-recognition-video.css';
 
-const translate = async (message, targetLanguage) => {
+const translate = async (message, to) => {
     const encodedParams = new URLSearchParams();
-    encodedParams.set('from', 'ru');
-    encodedParams.set('to', 'en');
+    encodedParams.set('from', 'auto');
+    encodedParams.set('to', to);
     encodedParams.set('text', message);
 
     const options = {
@@ -41,18 +41,10 @@ const SpeechRecognitionVideo = ({ clientID, isLocalVideo, targetLanguage }) => {
         listening,
     } = useSpeechRecognition();
 
-    // useEffect(() => {
-    //     if (finalTranscript !== '') {
-    //         console.log('Got final result:', finalTranscript);
-    //         translateAndDisplay(finalTranscript, language);
-    //     }
-    // }, [interimTranscript, finalTranscript]);
-
     const startListening = () => {
-        console.log(targetLanguage);
         SpeechRecognition.startListening({
             continuous: true,
-            language: 'ru-RU',
+            language: 'ru-RU'
         });
     };
 
@@ -76,7 +68,7 @@ const SpeechRecognitionVideo = ({ clientID, isLocalVideo, targetLanguage }) => {
         const interval = setInterval(() => {
             if (finalTranscript !== '') {
                 console.log('Got final result:', finalTranscript);
-                translateAndDisplay(finalTranscript, "sp");
+                translateAndDisplay(finalTranscript, targetLanguage);
                 resetTranscript();
             }
         }, 5000);

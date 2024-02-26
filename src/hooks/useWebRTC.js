@@ -46,21 +46,6 @@ export default function useWebRTC(roomID) {
     const selectedLanguage = i18n.language;
 
     const [translationLanguage, setTranslationLanguage] = useState(i18n.language);
-    const [startTime, setStartTime] = useState(null);
-    const [endTime, setEndTime] = useState(null);
-
-
-    // const saveCallInfo = useCallback(() => {
-    //     const callInfo = {
-    //         startTime: startTime, // Замените startTime на соответствующую переменную, содержащую время начала звонка
-    //         endTime: endTime, // Замените endTime на соответствующую переменную, содержащую время окончания звонка
-    //         translationLanguage: translationLanguage, // Замените translationLanguage на соответствующую переменную, содержащую язык перевода
-    //         secondParticipant: secondParticipantInfo, // Замените secondParticipantInfo на соответствующую переменную, содержащую информацию о втором участнике
-    //     };
-
-    //     AuthService.saveCall(callInfo);
-    // }, [startTime, endTime, translationLanguage, secondParticipantInfo]);
-
 
     const addNewClient = useCallback((newClient, cb) => {
         updateClients(list => {
@@ -187,8 +172,6 @@ export default function useWebRTC(roomID) {
                     peerID,
                     sessionDescription: offer,
                 });
-                // setStartTime(Date.now());
-                // setSecondParticipantInfo(peerID);
             }
         }
 
@@ -280,23 +263,7 @@ export default function useWebRTC(roomID) {
                 }
             });
 
-            // SpeechRecognition.startListening({
-            //     continuous: true,
-            //     language: 'ru-Ru',
-            //     interimResults: true,
-            //     maxAlternatives: 1,
-            //     audioBitsPerSecond: 128000,
-            //     onResult: (result) => {
-            //       // Обработка распознанной речи
-            //       console.log('Recognized speech:', result);
-            //     },
-            //     onEnd: () => {
-            //       console.log('Speech recognition ended');
-            //     },
-            //     onError: (error) => {
-            //       console.error('Speech recognition error:', error);
-            //     }
-            //   });
+          
               
         }
 
