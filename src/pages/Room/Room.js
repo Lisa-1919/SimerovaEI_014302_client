@@ -44,13 +44,13 @@ export default function Room() {
     toggleMicrophone();
   };
   const handleSendMessage = () => {
-    sendMessage(inputMessage); // Call the sendMessage function from useWebRTC.js
-    setInputMessage(""); // Clear the input field after sending the message
+    sendMessage(inputMessage);
+    setInputMessage("");
   };
 
   const handleTextareaChange = (event) => {
-    event.target.style.height = "auto"; // Reset the height to auto
-    event.target.style.height = event.target.scrollHeight + "px"; // Set the height to fit the content
+    event.target.style.height = "auto"; 
+    event.target.style.height = event.target.scrollHeight + "px";
   };
   
 

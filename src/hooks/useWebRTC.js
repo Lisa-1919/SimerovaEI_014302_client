@@ -7,33 +7,19 @@ import i18n from "../18n";
 import AuthService from "../services/auth.server";
 import axios from 'axios';
 
-const translateMessage = async (message, targetLanguage) => {
-    const encodedParams = new URLSearchParams();
-    encodedParams.set('from', 'auto');
-    encodedParams.set('to', targetLanguage);
-    encodedParams.set('text', message);
-
-    const options = {
-        method: 'POST',
-        url: 'https://google-translate113.p.rapidapi.com/api/v1/translator/text',
-        headers: {
-            'content-type': 'application/x-www-form-urlencoded',
-            'X-RapidAPI-Key': '',
-            'X-RapidAPI-Host': 'google-translate113.p.rapidapi.com'
-        },
-        data: encodedParams,
-    };
-
+const translateMessage = async (message, selectedLanguage) => {
     try {
-        const response = await axios.request(options);
-        console.log(response.data);
-        return response.data.trans;
+        const response = await axios.post('http://localhost:5000/translate-message', {
+            message,
+            selectedLanguage,
+        });
+
+        // Return the translated message from the server
+        return response.data.translatedMessage;
     } catch (error) {
-        console.error(error);
-        return null;
+        throw new Error('Failed to translate message');
     }
 };
-
 
 export const LOCAL_VIDEO = 'LOCAL_VIDEO';
 export default function useWebRTC(roomID) {
@@ -45,21 +31,8 @@ export default function useWebRTC(roomID) {
     const selectedLanguage = i18n.language;
 
     const [translationLanguage, setTranslationLanguage] = useState(i18n.language);
-    const [startTime, setStartTime] = useState(null);
-    const [endTime, setEndTime] = useState(null);
+
     const [secondParticipantInfo, setSecondParticipantInfo] = useState(null);
-
-
-    const saveCallInfo = useCallback(() => {
-        const callInfo = {
-            startTime: startTime, // Замените startTime на соответствующую переменную, содержащую время начала звонка
-            endTime: endTime, // Замените endTime на соответствующую переменную, содержащую время окончания звонка
-            translationLanguage: translationLanguage, // Замените translationLanguage на соответствующую переменную, содержащую язык перевода
-            secondParticipant: secondParticipantInfo, // Замените secondParticipantInfo на соответствующую переменную, содержащую информацию о втором участнике
-        };
-
-        AuthService.saveCall(callInfo);
-    }, [startTime, endTime, translationLanguage, secondParticipantInfo]);
 
 
     const addNewClient = useCallback((newClient, cb) => {
@@ -107,7 +80,6 @@ export default function useWebRTC(roomID) {
         //}
     }, [translationLanguage]);
 
-    // Function to handle incoming chat messages
     const handleIncomingMessage = useCallback(async (message) => {
         const translatedMessage = await translateMessage(message, selectedLanguage);
         if (translatedMessage) {
@@ -158,6 +130,7 @@ export default function useWebRTC(roomID) {
                 if (tracksNumber === 2) {
                     tracksNumber = 0;
                     addNewClient(peerID, () => {
+                        
                         if (peerMediaElements.current[peerID]) {
                             peerMediaElements.current[peerID].srcObject = remoteStream;
                         } else {
@@ -190,7 +163,6 @@ export default function useWebRTC(roomID) {
                     peerID,
                     sessionDescription: offer,
                 });
-                setStartTime(Date.now());
                 setSecondParticipantInfo(peerID);
             }
         }
@@ -210,9 +182,7 @@ export default function useWebRTC(roomID) {
 
             if (remoteDescription.type === 'offer') {
                 const answer = await peerConnections.current[peerID].createAnswer();
-
                 await peerConnections.current[peerID].setLocalDescription(answer);
-
                 socket.emit(ACTIONS.RELAY_SDP, {
                     peerID,
                     sessionDescription: answer,
@@ -221,7 +191,6 @@ export default function useWebRTC(roomID) {
         }
 
         socket.on(ACTIONS.SESSION_DESCRIPTION, setRemoteMedia)
-
         return () => {
             socket.off(ACTIONS.SESSION_DESCRIPTION);
         }
@@ -244,15 +213,12 @@ export default function useWebRTC(roomID) {
             if (peerConnections.current[peerID]) {
                 peerConnections.current[peerID].close();
             }
-
             delete peerConnections.current[peerID];
-            delete peerMediaElements.current[peerID];
-
+            delete peerMediaElements.current[peerID]
             updateClients(list => list.filter(c => c !== peerID));
         };
 
         socket.on(ACTIONS.REMOVE_PEER, handleRemovePeer);
-
         return () => {
             socket.off(ACTIONS.REMOVE_PEER);
         }
@@ -273,10 +239,8 @@ export default function useWebRTC(roomID) {
                 console.error("Error capturing local stream", err);
                 return;
             }
-
             addNewClient(LOCAL_VIDEO, () => {
                 const localVideoElement = peerMediaElements.current[LOCAL_VIDEO];
-
                 if (localVideoElement) {
                     localVideoElement.volume = 0;
                     localVideoElement.srcObject = localMediaStream.current;
@@ -302,12 +266,8 @@ export default function useWebRTC(roomID) {
     }, []);
 
     const handleLeave = useCallback(() => {
-        setEndTime(Date.now());
-        saveCallInfo();
         socket.emit(ACTIONS.LEAVE);
     }, []);
-
-
 
     useEffect(() => {
         socket.on(ACTIONS.RECEIVE_MESSAGE, handleIncomingMessage);
