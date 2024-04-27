@@ -6,20 +6,36 @@ import useStateWithCallback from "./useStateWithCallback";
 import i18n from "../18n";
 import AuthService from "../services/auth.server";
 import axios from 'axios';
+import socketIOClient from 'socket.io-client';
 
+
+// const translateMessage = async (message, selectedLanguage) => {
+//     try {
+//         const response = await axios.post('http://localhost:5000/translate-message', {
+//             message,
+//             selectedLanguage,
+//         });
+
+//         // Return the translated message from the server
+//         return response.data.translatedMessage;
+//     } catch (error) {
+//         throw new Error('Failed to translate message');
+//     }
+// };
 const translateMessage = async (message, selectedLanguage) => {
     try {
-        const response = await axios.post('http://localhost:5000/translate-message', {
-            message,
-            selectedLanguage,
-        });
-
-        // Return the translated message from the server
-        return response.data.translatedMessage;
+      const response = await axios.post('http://localhost:5000/translate-message', {
+        message,
+        selectedLanguage,
+      });
+  
+      // Return the translated message from the server
+      return response.data.translatedMessage;
     } catch (error) {
-        throw new Error('Failed to translate message');
+      throw new Error('Failed to translate message');
     }
-};
+  };
+
 
 export const LOCAL_VIDEO = 'LOCAL_VIDEO';
 export default function useWebRTC(roomID) {
@@ -34,6 +50,7 @@ export default function useWebRTC(roomID) {
 
     const [secondParticipantInfo, setSecondParticipantInfo] = useState(null);
 
+    const transkationSocket = socketIOClient('http://localhost:5000');
 
     const addNewClient = useCallback((newClient, cb) => {
         updateClients(list => {
@@ -80,12 +97,39 @@ export default function useWebRTC(roomID) {
         //}
     }, [translationLanguage]);
 
-    const handleIncomingMessage = useCallback(async (message) => {
-        const translatedMessage = await translateMessage(message, selectedLanguage);
-        if (translatedMessage) {
-            setMessages(prevMessages => [...prevMessages, translatedMessage]);
+    useEffect(() => {
+        transkationSocket.on('translated-message', data => {
+          setMessages(prevMessages => [...prevMessages, data.translatedMessage]);
+        });
+    
+        transkationSocket.on('translation-error', error => {
+          console.error('Translation error:', error);
+          // Handle the translation error as needed
+        });
+    
+        return () => {
+            transkationSocket.disconnect();
+        };
+      }, [transkationSocket]);
+    
+      const handleIncomingMessage = useCallback(async message => {
+        try {
+          const translatedMessage = await translateMessage(message, selectedLanguage);
+          if (translatedMessage) {
+            transkationSocket.emit('translate-message', { message: translatedMessage, selectedLanguage });
+          }
+        } catch (error) {
+          console.error('Error handling incoming message:', error);
+          // Handle the error as needed
         }
-    }, [translationLanguage]);
+      }, [selectedLanguage, transkationSocket]);
+
+    // const handleIncomingMessage = useCallback(async (message) => {
+    //     const translatedMessage = await translateMessage(message, selectedLanguage);
+    //     if (translatedMessage) {
+    //         setMessages(prevMessages => [...prevMessages, translatedMessage]);
+    //     }
+    // }, [translationLanguage]);
 
     useEffect(() => {
         async function handleNewPeer({ peerID, createOffer }) {
