@@ -8,34 +8,18 @@ import AuthService from "../services/auth.server";
 import axios from 'axios';
 import socketIOClient from 'socket.io-client';
 
-
-// const translateMessage = async (message, selectedLanguage) => {
-//     try {
-//         const response = await axios.post('http://localhost:5000/translate-message', {
-//             message,
-//             selectedLanguage,
-//         });
-
-//         // Return the translated message from the server
-//         return response.data.translatedMessage;
-//     } catch (error) {
-//         throw new Error('Failed to translate message');
-//     }
-// };
-const translateMessage = async (message, selectedLanguage) => {
+const translateMessage = async (message, translationLanguage) => {
     try {
-      const response = await axios.post('http://localhost:5000/translate-message', {
-        message,
-        selectedLanguage,
-      });
-  
-      // Return the translated message from the server
-      return response.data.translatedMessage;
+        const response = await axios.post('http://localhost:5000/translate-message', {
+            message,
+            translationLanguage,
+        });
+        return response.data.translatedMessage;
     } catch (error) {
-      throw new Error('Failed to translate message');
+        return message;
+       // throw new Error('Failed to translate message');
     }
-  };
-
+};
 
 export const LOCAL_VIDEO = 'LOCAL_VIDEO';
 export default function useWebRTC(roomID) {
@@ -43,15 +27,9 @@ export default function useWebRTC(roomID) {
     const [isCameraOn, setCameraOn] = useState(true);
     const [isMicrophoneOn, setMicrophoneOn] = useState(true);
     const [messages, setMessages] = useState([]);
-
     const selectedLanguage = i18n.language;
-
     const [translationLanguage, setTranslationLanguage] = useState(i18n.language);
-
     const [secondParticipantInfo, setSecondParticipantInfo] = useState(null);
-
-    const transkationSocket = socketIOClient('http://localhost:5000');
-
     const addNewClient = useCallback((newClient, cb) => {
         updateClients(list => {
             if (!list.includes(newClient)) {
@@ -85,8 +63,6 @@ export default function useWebRTC(roomID) {
     }, []);
 
     const sendMessage = useCallback(async (message) => {
-        //const translatedMessage = await translateMessage(message, selectedLanguage);
-        // if (translatedMessage) {
         Object.keys(peerConnections.current).forEach((peerID) => {
             const dataChannel = peerConnections.current[peerID].createDataChannel('chat');
             dataChannel.onopen = () => {
@@ -94,42 +70,16 @@ export default function useWebRTC(roomID) {
             };
         });
         setMessages(prevMessages => [...prevMessages, message]);
-        //}
     }, [translationLanguage]);
 
-    useEffect(() => {
-        transkationSocket.on('translated-message', data => {
-          setMessages(prevMessages => [...prevMessages, data.translatedMessage]);
-        });
+    const handleIncomingMessage = useCallback(async (message) => {
+        // const translatedMessage = await translateMessage(message, translationLanguage);
+        // if (translatedMessage) {
+        //     setMessages(prevMessages => [...prevMessages, translatedMessage]);
+        // }
+        setMessages(prevMessages => [...prevMessages, message]);
+    }, [translationLanguage]);
     
-        transkationSocket.on('translation-error', error => {
-          console.error('Translation error:', error);
-          // Handle the translation error as needed
-        });
-    
-        return () => {
-            transkationSocket.disconnect();
-        };
-      }, [transkationSocket]);
-    
-      const handleIncomingMessage = useCallback(async message => {
-        try {
-          const translatedMessage = await translateMessage(message, selectedLanguage);
-          if (translatedMessage) {
-            transkationSocket.emit('translate-message', { message: translatedMessage, selectedLanguage });
-          }
-        } catch (error) {
-          console.error('Error handling incoming message:', error);
-          // Handle the error as needed
-        }
-      }, [selectedLanguage, transkationSocket]);
-
-    // const handleIncomingMessage = useCallback(async (message) => {
-    //     const translatedMessage = await translateMessage(message, selectedLanguage);
-    //     if (translatedMessage) {
-    //         setMessages(prevMessages => [...prevMessages, translatedMessage]);
-    //     }
-    // }, [translationLanguage]);
 
     useEffect(() => {
         async function handleNewPeer({ peerID, createOffer }) {
@@ -149,32 +99,70 @@ export default function useWebRTC(roomID) {
                     });
                 }
             }
-
             const dataChannel = peerConnections.current[peerID].createDataChannel('chat');
-
             dataChannel.onopen = () => {
                 console.log('Data channel is open');
             };
-
             dataChannel.onmessage = (event) => {
                 handleIncomingMessage(event.data);
             };
-
             peerConnections.current[peerID].ondatachannel = (event) => {
                 const receiveChannel = event.channel;
                 receiveChannel.onmessage = (event) => {
                     handleIncomingMessage(event.data);
                 };
             };
-
             let tracksNumber = 0;
+
+            // let mediaRecorder; // Переменная для хранения MediaRecorder
+            // let recordedChunks = []; // Массив для хранения записанных кадров
+            
+            // // Начать запись видеопотока
+            // function startRecording(stream) {
+            //   mediaRecorder = new MediaRecorder(stream);
+            //   mediaRecorder.ondataavailable = handleDataAvailable;
+            //   mediaRecorder.start(); // Начать запись
+            //   setTimeout(stopRecording, 10000); // Остановить запись через 10 секунд
+            // }
+            
+            // // Остановить запись видеопотока
+            // function stopRecording() {
+            //   mediaRecorder.stop();
+            //   // Отправить записанные кадры на сервер
+            //   sendToServer(new Blob(recordedChunks, { type: 'video/webm' }));
+            //   // Очистить массив записанных кадров
+            //   recordedChunks = [];
+            //   // Начать новую запись
+            //   startRecording(remoteStream);
+            // }
+            
+            // // Обработчик доступных данных
+            // function handleDataAvailable(event) {
+            //   recordedChunks.push(event.data);
+            // }
+            
+            // // Отправить записанный видеофайл на сервер
+            // function sendToServer(blob) {
+            //   // Используйте fetch или другой метод для отправки blob на сервер
+            //   fetch('/upload-video', {
+            //     method: 'POST',
+            //     body: blob
+            //   })
+            //   .then(response => {
+            //     // Обработка ответа от сервера
+            //   })
+            //   .catch(error => {
+            //     // Обработка ошибок
+            //   });
+            // }
+
             peerConnections.current[peerID].ontrack = ({ streams: [remoteStream] }) => {
                 tracksNumber++
-
                 if (tracksNumber === 2) {
                     tracksNumber = 0;
                     addNewClient(peerID, () => {
-                        
+                        //translate video here
+                       // startRecording(remoteStream);
                         if (peerMediaElements.current[peerID]) {
                             peerMediaElements.current[peerID].srcObject = remoteStream;
                         } else {
@@ -193,16 +181,12 @@ export default function useWebRTC(roomID) {
                     });
                 }
             }
-
             localMediaStream.current.getTracks().forEach(track => {
                 peerConnections.current[peerID].addTrack(track, localMediaStream.current);
             });
-
             if (createOffer) {
                 const offer = await peerConnections.current[peerID].createOffer();
-
                 await peerConnections.current[peerID].setLocalDescription(offer);
-
                 socket.emit(ACTIONS.RELAY_SDP, {
                     peerID,
                     sessionDescription: offer,
@@ -210,9 +194,7 @@ export default function useWebRTC(roomID) {
                 setSecondParticipantInfo(peerID);
             }
         }
-
         socket.on(ACTIONS.ADD_PEER, handleNewPeer);
-
         return () => {
             socket.off(ACTIONS.ADD_PEER);
         }
@@ -223,7 +205,6 @@ export default function useWebRTC(roomID) {
             await peerConnections.current[peerID]?.setRemoteDescription(
                 new RTCSessionDescription(remoteDescription)
             );
-
             if (remoteDescription.type === 'offer') {
                 const answer = await peerConnections.current[peerID].createAnswer();
                 await peerConnections.current[peerID].setLocalDescription(answer);
@@ -233,7 +214,6 @@ export default function useWebRTC(roomID) {
                 });
             }
         }
-
         socket.on(ACTIONS.SESSION_DESCRIPTION, setRemoteMedia)
         return () => {
             socket.off(ACTIONS.SESSION_DESCRIPTION);
@@ -327,7 +307,7 @@ export default function useWebRTC(roomID) {
         handleLeave,
         toggleCamera,
         toggleMicrophone,
-        messages, // Return the chat messages
-        sendMessage, // Return the function to send chat messages
+        messages,
+        sendMessage,
     };
 }

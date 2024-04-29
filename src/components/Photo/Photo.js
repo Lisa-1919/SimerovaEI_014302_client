@@ -20,13 +20,13 @@ const Photo = () => {
             };
 
             reader.readAsDataURL(file);
-            // try {
-            //     const response = await authServer.handleUpload(file);
-            //     console.log(response);
-            // } catch (error) {
-            //     console.error(error);
-            // }
-            // setErrorMessage("");
+            try {
+                const response = await authServer.handleUpload(file);
+                console.log(response);
+            } catch (error) {
+                console.error(error);
+            }
+            setErrorMessage("");
         } else {
             setErrorMessage("Please select another image. The file size should not exceed 10MB.");
         }
