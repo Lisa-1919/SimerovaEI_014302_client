@@ -73,11 +73,11 @@ export default function useWebRTC(roomID) {
     }, [translationLanguage]);
 
     const handleIncomingMessage = useCallback(async (message) => {
-        // const translatedMessage = await translateMessage(message, translationLanguage);
-        // if (translatedMessage) {
-        //     setMessages(prevMessages => [...prevMessages, translatedMessage]);
-        // }
-        setMessages(prevMessages => [...prevMessages, message]);
+        const translatedMessage = await translateMessage(message, translationLanguage);
+        if (translatedMessage) {
+            setMessages(prevMessages => [...prevMessages, translatedMessage]);
+        }
+        // setMessages(prevMessages => [...prevMessages, message]);
     }, [translationLanguage]);
     
 
@@ -114,55 +114,11 @@ export default function useWebRTC(roomID) {
             };
             let tracksNumber = 0;
 
-            // let mediaRecorder; // Переменная для хранения MediaRecorder
-            // let recordedChunks = []; // Массив для хранения записанных кадров
-            
-            // // Начать запись видеопотока
-            // function startRecording(stream) {
-            //   mediaRecorder = new MediaRecorder(stream);
-            //   mediaRecorder.ondataavailable = handleDataAvailable;
-            //   mediaRecorder.start(); // Начать запись
-            //   setTimeout(stopRecording, 10000); // Остановить запись через 10 секунд
-            // }
-            
-            // // Остановить запись видеопотока
-            // function stopRecording() {
-            //   mediaRecorder.stop();
-            //   // Отправить записанные кадры на сервер
-            //   sendToServer(new Blob(recordedChunks, { type: 'video/webm' }));
-            //   // Очистить массив записанных кадров
-            //   recordedChunks = [];
-            //   // Начать новую запись
-            //   startRecording(remoteStream);
-            // }
-            
-            // // Обработчик доступных данных
-            // function handleDataAvailable(event) {
-            //   recordedChunks.push(event.data);
-            // }
-            
-            // // Отправить записанный видеофайл на сервер
-            // function sendToServer(blob) {
-            //   // Используйте fetch или другой метод для отправки blob на сервер
-            //   fetch('/upload-video', {
-            //     method: 'POST',
-            //     body: blob
-            //   })
-            //   .then(response => {
-            //     // Обработка ответа от сервера
-            //   })
-            //   .catch(error => {
-            //     // Обработка ошибок
-            //   });
-            // }
-
             peerConnections.current[peerID].ontrack = ({ streams: [remoteStream] }) => {
                 tracksNumber++
                 if (tracksNumber === 2) {
                     tracksNumber = 0;
                     addNewClient(peerID, () => {
-                        //translate video here
-                       // startRecording(remoteStream);
                         if (peerMediaElements.current[peerID]) {
                             peerMediaElements.current[peerID].srcObject = remoteStream;
                         } else {
@@ -311,3 +267,69 @@ export default function useWebRTC(roomID) {
         sendMessage,
     };
 }
+
+// useEffect(() => {
+//     // ... (ваш существующий код)
+
+//     // Функция для отправки видеопотока на сервер для перевода
+//     const sendVideoForTranslation = (videoBlob) => {
+//         const socket = new WebSocket('ws://your-translation-server-url');
+//         socket.onopen = () => {
+//             // Отправка видеопотока на сервер
+//             socket.send(videoBlob);
+//         };
+//         socket.onmessage = (event) => {
+//             // Обработка полученного переведенного видеопотока
+//             const translatedVideoBlob = event.data;
+//             // Действия с переведенным видеопотоком, например, отображение его в элементе video
+//         };
+//     };
+
+//     // Модифицированная функция startCapture с отправкой видеопотока на сервер для перевода
+//     async function startCapture() {
+//         try {
+//             localMediaStream.current = await navigator.mediaDevices.getUserMedia({
+//                 audio: true,
+//                 video: {
+//                     width: 1200,
+//                     height: 720
+//                 }
+//             });
+
+//             // Convert the video stream to a Blob
+//             const mediaRecorder = new MediaRecorder(localMediaStream.current);
+//             const chunks = [];
+//             mediaRecorder.ondataavailable = e => chunks.push(e.data);
+//             mediaRecorder.onstop = () => {
+//                 const videoBlob = new Blob(chunks, { type: chunks[0].type });
+//                 // Отправка видеопотока на сервер для перевода
+//                 sendVideoForTranslation(videoBlob);
+//             };
+//             // Start recording the video stream
+//             mediaRecorder.start();
+
+//         } catch (err) {
+//             console.error("Error capturing local stream", err);
+//             return;
+//         }
+//         addNewClient(LOCAL_VIDEO, () => {
+//             const localVideoElement = peerMediaElements.current[LOCAL_VIDEO];
+//             if (localVideoElement) {
+//                 localVideoElement.volume = 0;
+//                 localVideoElement.srcObject = localMediaStream.current;
+//             }
+//         });
+//     }
+
+//     startCapture()
+//         .then(() => socket.emit(ACTIONS.JOIN, { room: roomID }))
+//         .catch(e => console.error('Error getting userMedia:', e));
+
+//     return () => {
+//         if (localMediaStream.current) {
+//             localMediaStream.current.getTracks().forEach(track => track.stop());
+
+//             socket.emit(ACTIONS.LEAVE);
+//         }
+//     };
+// }, [roomID]);
