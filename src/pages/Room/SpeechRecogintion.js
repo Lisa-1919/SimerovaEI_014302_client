@@ -3,33 +3,18 @@ import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognitio
 import axios from 'axios';
 import './speech-recognition-video.css';
 
-const translate = async (message, to) => {
-    const encodedParams = new URLSearchParams();
-    encodedParams.set('from', 'auto');
-    encodedParams.set('to', to);
-    encodedParams.set('text', message);
-
-    const options = {
-        method: 'POST',
-        url: 'https://google-translate113.p.rapidapi.com/api/v1/translator/text',
-        headers: {
-            'content-type': 'application/x-www-form-urlencoded',
-            'X-RapidAPI-Key': '459c909060msh259d284d0105b54p151393jsnbb0570bf2901',
-            'X-RapidAPI-Host': 'google-translate113.p.rapidapi.com'
-        },
-        data: encodedParams,
-    };
-
+const translate = async (message, translationLanguage) => {
     try {
-        const response = await axios.request(options);
-        console.log(response.data);
-        return response.data.trans;
+        const response = await axios.post('http://localhost:5000/translate-message', {
+            message,
+            translationLanguage,
+        });
+        return response.data.translatedMessage;
     } catch (error) {
-        console.error(error);
-        return null;
+        return message;
+       // throw new Error('Failed to translate message');
     }
 };
-
 const SpeechRecognitionVideo = ({ clientID, isLocalVideo, targetLanguage }) => {
     const [message, setMessage] = useState('');
     const {
