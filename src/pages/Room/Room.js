@@ -10,6 +10,7 @@ import { PiCamera, PiCameraSlash, PiMicrophone, PiMicrophoneSlash } from "react-
 import { MdCallEnd } from "react-icons/md";
 import { IoRocketSharp } from "react-icons/io5";
 import { RiUserShared2Line } from "react-icons/ri";
+import { Email } from '../../components/Email/Email';
 
 export default function Room() {
   let navigate = useNavigate();
@@ -53,12 +54,37 @@ export default function Room() {
     event.target.style.height = event.target.scrollHeight + "px";
   };
   
+  const [showEmailForm, setShowEmailForm] = React.useState(false);
+  const [emailSentMessage, setEmailSentMessage] = React.useState('');
+
+  const handleShareRoom = () => {
+    setShowEmailForm(true);
+  };
+  const handleCloseForm = () => {
+    setShowEmailForm(false);
+  };
+  
+
+  const handleEmailSent = () => {
+    setEmailSentMessage(emailSentMessage);
+    setShowEmailForm(false);
+  };
 
   return (
     <div className="room">
-      <div className="room-id">
-        {t('room_id')}: {roomID}
-
+ <div className="share-room">
+        {showEmailForm ? (
+          <div className='share-email-form'>
+            <Email roomID={roomID} senderEmail={user.email} onEmailSent={handleEmailSent} />
+            <button onClick={handleCloseForm} className='btn-close'><AiOutlineClose className='icon-close' /></button>
+          </div>
+        ) : (
+          <div className='room-id'>
+            {t('room_id')}: {roomID}
+            <button onClick={handleShareRoom} className='btn-share'><RiUserSharedFill className='icon-share' /></button>
+          </div>
+        )}
+        {emailSentMessage && <div>{emailSentMessage}</div>}
       </div>
       <div className="call">
         {clients.map((clientID, index) => {

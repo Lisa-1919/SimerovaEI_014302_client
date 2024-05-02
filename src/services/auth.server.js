@@ -77,7 +77,7 @@ class AuthService {
 
   changePassword(username, oldPassword, newPassword) {
     return axios
-      .post(API_URL + "changepassword", {
+      .post(API_URL + "change-password", {
         username,
         oldPassword,
         newPassword
