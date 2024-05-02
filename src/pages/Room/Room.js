@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import useWebRTC, { LOCAL_VIDEO } from '../../hooks/useWebRTC';
 import './room.css';
@@ -9,11 +9,16 @@ import i18n from '../../18n';
 import { PiCamera, PiCameraSlash, PiMicrophone, PiMicrophoneSlash } from "react-icons/pi";
 import { MdCallEnd } from "react-icons/md";
 import { IoRocketSharp } from "react-icons/io5";
-import { RiUserShared2Line } from "react-icons/ri";
+import { RiUserSharedFill } from "react-icons/ri";
+import authServer from '../../services/auth.server';
+import SpeechRecognitionVideo from './SpeechRecogintion';
 import { Email } from '../../components/Email/Email';
+import { AiOutlineClose } from 'react-icons/ai';
+
 
 export default function Room() {
   let navigate = useNavigate();
+  const user = authServer.getCurrentUser();
   const selectedLanguage = i18n.language;
   const { id: roomID } = useParams();
   const { clients, provideMediaRef, handleLeave, toggleCamera, toggleMicrophone,
@@ -21,16 +26,34 @@ export default function Room() {
   const [isCameraOn, setCameraOn] = useState(true);
   const [isMicrophoneOn, setMicrophoneOn] = useState(true);
   const { t } = useTranslation();
+
   const { transcript, resetTranscript } = useSpeechRecognition();
   const [subtitlesEnabled, setSubtitlesEnabled] = useState(false);
+  const [currentSubtitle, setCurrentSubtitle] = useState('');
+
   const [inputMessage, setInputMessage] = useState("");
   const [textareaHeight, setTextareaHeight] = useState("auto");
+
+  // const [startTime, setStartTime] = useState(null);
+  // const [endTime, setEndTime] = useState(null);
+
+  // const saveCallInfo = useCallback(() => {
+  //   const callInfo = {
+  //     startTime: startTime,
+  //     endTime: endTime,
+  //     roomID: roomID,
+  //   };
+
+  //   authServer.saveCall(callInfo);
+  // }, [startTime, endTime]);
 
   const handleProvideMediaRef = useCallback((clientID, instance) => {
     provideMediaRef(clientID, instance);
   }, [provideMediaRef]);
 
   const handleExitRoom = () => {
+    setEndTime(new Date());
+    authServer.saveCall(startTime, endTime);
     handleLeave();
     navigate('/home');
   };
@@ -50,10 +73,34 @@ export default function Room() {
   };
 
   const handleTextareaChange = (event) => {
-    event.target.style.height = "auto"; 
+    event.target.style.height = "auto";
     event.target.style.height = event.target.scrollHeight + "px";
   };
-  
+
+
+  const handleToggleSubtitles = () => {
+    setSubtitlesEnabled(prevState => !prevState);
+  };
+
+  useEffect(() => {
+    if (subtitlesEnabled) {
+      SpeechRecognition.language = selectedLanguage;
+      SpeechRecognition.startListening();
+    } else {
+      SpeechRecognition.stopListening();
+      resetTranscript();
+    }
+
+  }, [subtitlesEnabled, resetTranscript]);
+
+  useEffect(() => {
+    if (subtitlesEnabled) {
+      setCurrentSubtitle(transcript);
+    } else {
+      setCurrentSubtitle('');
+    } console.log(transcript);
+  }, [subtitlesEnabled, transcript]);
+
   const [showEmailForm, setShowEmailForm] = React.useState(false);
   const [emailSentMessage, setEmailSentMessage] = React.useState('');
 
@@ -70,9 +117,10 @@ export default function Room() {
     setShowEmailForm(false);
   };
 
+
   return (
     <div className="room">
- <div className="share-room">
+      <div className="share-room">
         {showEmailForm ? (
           <div className='share-email-form'>
             <Email roomID={roomID} senderEmail={user.email} onEmailSent={handleEmailSent} />
@@ -86,6 +134,7 @@ export default function Room() {
         )}
         {emailSentMessage && <div>{emailSentMessage}</div>}
       </div>
+
       <div className="call">
         {clients.map((clientID, index) => {
           return (
@@ -100,14 +149,10 @@ export default function Room() {
                 playsInline
                 muted={clientID === LOCAL_VIDEO}
               />
-              {/* {clientID !== LOCAL_VIDEO && (
-                <div>
-                  <button onClick={handleToggleSubtitles}>
-                    {subtitlesEnabled ? 'Выключить субтитры' : 'Включить субтитры'}
-                  </button>
-                  {subtitlesEnabled && <div className="subtitles">{transcript}</div>}
-                </div>
-              )} */}
+              {clientID !== LOCAL_VIDEO && (
+                <SpeechRecognitionVideo clientID={clientID} isLocalVideo={false} targetLanguage={user.language} />
+              )}
+
               {clientID === LOCAL_VIDEO && (
                 <div className='call-buttons'>
                   <button className='btn-action' onClick={handleExitRoom} ><MdCallEnd className='icon' id='call-icon' /></button>

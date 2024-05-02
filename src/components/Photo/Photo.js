@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import './photo.css';
 import { useTranslation } from "react-i18next";
-import authServer from '../../services/auth.server';
+import AuthServer from '../../services/auth.server';
 import { IoAddOutline } from "react-icons/io5";
 
 const Photo = () => {
     const { t } = useTranslation();
     const [selectedImage, setSelectedImage] = useState(null);
-    const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState('');
 
     const handleImageUpload = async (event) => {
         const file = event.target.files[0];
@@ -43,32 +43,32 @@ const Photo = () => {
         }
     };
 
-    return (
-        <div className='photo'>
-          <div className="photo-container">
-            {selectedImage ? (
-              <img src={selectedImage} alt="Фото" className="rounded-photo" />
-            ) : (
-              <div className="placeholder">{errorMessage || t("select_img")}</div>
-            )}
-          </div>
-          <label htmlFor="file-upload" className="upload-button">
-            {t("upload")}
-          </label>
-          <input
-            id="file-upload"
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            className="select-img"
-          />
-          {selectedImage && (
-            <button onClick={handleSaveImage} className="save-button">
-              Save
-            </button>
-          )}
-        </div>
-      );
+  return (
+    <div className='photo'>
+      <div className="photo-container">
+        {selectedImage ? (
+          <img src={selectedImage} alt="Фото" className="rounded-photo" />
+        ) : (
+          <div className="placeholder">{errorMessage || t("select_img")}</div>
+        )}
+      </div>
+      <label htmlFor="file-upload" className="upload-button">
+        {t("upload")}
+      </label>
+      <input
+        id="file-upload"
+        type="file"
+        accept="image/*"
+        onChange={handleImageUpload}
+        className="select-img"
+      />
+      {selectedImage && (
+        <button onClick={handleSaveImage} className="save-button">
+          Save
+        </button>
+      )}
+    </div>
+  );
 };
 
 export default Photo;

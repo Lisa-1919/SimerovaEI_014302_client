@@ -20,7 +20,7 @@ const Header = () => {
     return (
         <div className="header">
             <div className='logo'>
-                <a href='/home'>Logo</a>
+                <a href='/home'>Voicager</a>
             </div>
             <div className="user">
                 <LanguageDropdown />

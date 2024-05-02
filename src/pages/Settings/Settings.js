@@ -4,40 +4,82 @@ import { useTranslation } from "react-i18next";
 import authServer from '../../services/auth.server';
 import Header from '../../components/Header/header';
 import './settings.css';
+import i18n from '../../18n';
+import LanguageDropdown from '../../components/LangDropdown/LanguageDropdown';
+import { useNavigate } from 'react-router-dom';
 
 const Settings = () => {
-    const { register, handleSubmit, formState: { errors } } = useForm();
-    const [message, setMessage] = useState('');
-    const [successful, setSuccessful] = useState(false);
+    const { register: passwordRegister, handleSubmit: handlePasswordSubmit, formState: { errors: passwordErrors } } = useForm();
+    const { register: languageRegister, handleSubmit: handleLanguageSubmit, formState: { errors: languageErrors } } = useForm();
+    const [passwordMessage, setPasswordMessage] = useState('');
+    const [passwordSuccessful, setPasswordSuccessful] = useState(false);
+    const [languageMessage, setLanguageMessage] = useState('');
+    const [languageSuccessful, setLanguageSuccessful] = useState(false);
     const { t } = useTranslation();
     const user = authServer.getCurrentUser();
+    const navigate = useNavigate();
 
-    const onSubmit = (data) => {
-        setMessage(data.message);
-        setSuccessful(false);
+    const onChangePassword = (data) => {
+        setPasswordMessage('');
+        setPasswordSuccessful(false);
 
-        if (Object.keys(errors).length === 0) {
+        if (Object.keys(passwordErrors).length === 0) {
             authServer.changePassword(user.username, data.oldPassword, data.newPassword)
                 .then(
                     (response) => {
-                        setMessage(response.data.message);
-                        setSuccessful(true);
+                        setPasswordMessage(data.message);
+                        setPasswordSuccessful(true);
                     },
                     (error) => {
                         const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
-                        setMessage(resMessage);
-                        setSuccessful(false);
+                        setPasswordMessage(resMessage);
+                        setPasswordSuccessful(false);
                     }
                 );
         }
+    };
+
+    const onChangeLanguage = (data) => {
+        setLanguageMessage('');
+        setLanguageSuccessful(false);
+        const selectedLanguage = i18n.language;
+        if (Object.keys(languageErrors).length === 0) {
+            authServer.changeLanguage(user.username, selectedLanguage)
+                .then(
+                    (response) => {
+                        setLanguageMessage(data.message);
+                        setLanguageSuccessful(true);
+                    },
+                    (error) => {
+                        const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
+                        setLanguageMessage(resMessage);
+                        setLanguageSuccessful(false);
+                    }
+                );
+        }
+    };
+
+    const onDeleteAccount = () => {
+        authServer.deleteAccount()
+            .then(
+            (response) => {
+                navigate("/")
+            },
+            (error) => {
+                const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
+                setPasswordMessage(resMessage);
+                setPasswordSuccessful(false);
+            }
+        );
+        
     };
 
     return (
         <div>
             <Header />
             <div className='settings'>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    {!successful && (
+                <div className='block'>
+                    <form onSubmit={handlePasswordSubmit(onChangePassword)}>
                         <div className='change-password'>
                             <p>{t("change-password")}</p>
                             <div>
@@ -45,31 +87,50 @@ const Settings = () => {
                                     type="password"
                                     id="oldPassword"
                                     placeholder={t("old-password")}
-                                    {...register("oldPassword", { required: true })}
+                                    {...passwordRegister("oldPassword", { required: true })}
                                 />
-                                {errors.oldPassword && <span>{t("old-password-required")}</span>}
+                                {passwordErrors.oldPassword && <span>{t("old-password-required")}</span>}
                             </div>
                             <div>
                                 <input
                                     type="password"
                                     id="newPassword"
                                     placeholder={t("new-password")}
-                                    {...register("newPassword", { required: true })}
+                                    {...passwordRegister("newPassword", { required: true })}
                                 />
-                                {errors.newPassword && <span>{t("new-password-required")}</span>}
+                                {passwordErrors.newPassword && <span>{t("new-password-required")}</span>}
                             </div>
                             <button className="btn">{t("save")}</button>
                         </div>
-                    )}
-                </form>
-                {message && (
-                    <div className={successful ? "success-message" : "error-message"}>
-                        {message}
-                    </div>
-                )}
+                        {passwordMessage && (
+                            <div className={passwordSuccessful ? "success-message" : "error-message"}>
+                                {passwordMessage}
+                            </div>
+                        )}
+                    </form>
+                </div>
+
+                <div className='block'>
+                    <form onSubmit={handleLanguageSubmit(onChangeLanguage)}>
+                        <div className='change-password'>
+                            <p>{t("select_lang")}</p>
+                            <div>
+                                <LanguageDropdown {...languageRegister("language")} />
+                            </div>
+                            <button className="btn">{t("save")}</button>
+                        </div>
+                        {languageMessage && (
+                            <div className={languageSuccessful ? "success-message" : "error-message"}>
+                                {languageMessage}
+                            </div>
+                        )}
+                    </form>
+                </div>
+                <div className='block'>
+                    <button className='btn' onClick={onDeleteAccount}>{t("delete")}</button>
+                </div>
             </div>
         </div>
-
     );
 };
 

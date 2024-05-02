@@ -6,8 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from "react-i18next";
 import LanguageDropdown from '../../components/LangDropdown/LanguageDropdown';
 
-
-
 const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [message, setMessage] = useState('');
@@ -18,7 +16,7 @@ const Login = () => {
   const onSubmit = (data) => {
     setMessage('');
     setSuccessful(false);
-
+  
     if (Object.keys(errors).length === 0) {
       AuthService.login(data.username, data.password)
         .then(() => {
@@ -34,6 +32,7 @@ const Login = () => {
         });
     }
   };
+  
 
   return (
     <div>

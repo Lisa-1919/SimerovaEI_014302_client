@@ -8,6 +8,7 @@ import AuthService from "../services/auth.server";
 import axios from 'axios';
 import socketIOClient from 'socket.io-client';
 
+
 const translateMessage = async (message, translationLanguage) => {
     try {
         const response = await axios.post('http://localhost:5000/translate-message', {
@@ -16,6 +17,8 @@ const translateMessage = async (message, translationLanguage) => {
         });
         return response.data.translatedMessage;
     } catch (error) {
+        return message;
+       // throw new Error('Failed to translate message');
         return message;
        // throw new Error('Failed to translate message');
     }
@@ -135,6 +138,7 @@ export default function useWebRTC(roomID) {
                             }, 1000);
                         }
                     });
+
                 }
             }
             localMediaStream.current.getTracks().forEach(track => {
@@ -226,6 +230,9 @@ export default function useWebRTC(roomID) {
                     localVideoElement.srcObject = localMediaStream.current;
                 }
             });
+
+          
+              
         }
 
         startCapture()
@@ -235,7 +242,7 @@ export default function useWebRTC(roomID) {
         return () => {
             if (localMediaStream.current) {
                 localMediaStream.current.getTracks().forEach(track => track.stop());
-
+                // SpeechRecognition.stopListening();
                 socket.emit(ACTIONS.LEAVE);
             }
         };

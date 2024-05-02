@@ -6,7 +6,7 @@
 }
 
 .room-id {
-    position: fixed;
+    /* position: fixed; */
     top: 3%;
     left: 3%;
     transform: translate(-3%, -3%);
@@ -29,6 +29,7 @@
     height: 70vh;
     margin: 10px;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
 }
@@ -68,7 +69,8 @@ margin: 2px;
 }
 
 .icon,
-.icon-send {
+.icon-send,
+.icon-share {
     width: 100%;
     height: 100%;
     color: #6F8CF5;
@@ -124,9 +126,7 @@ margin: 2px;
     font-size: 1vw;
     text-align: left;
     resize: none;
-    /* Disable manual resizing */
     overflow-y: auto;
-    /* Add vertical scroll if text overflows */
 }
 
 .input-message textarea:focus {
@@ -134,7 +134,7 @@ margin: 2px;
 }
 
 
-.icon-send:hover {
+.icon-send:hover, .icon-share:hover {
     color: #BFA181;
 }
 
@@ -149,3 +149,54 @@ margin: 2px;
     border: none;
     cursor: pointer;
 }
+
+.btn-share{
+    background-color: transparent;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+}
+
+.transcript{
+
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.subtitles{
+    width: 80%;
+    height: 80%;
+    color: white;
+}
+
+.share-room {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .room-id {
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .share-email-form {
+    margin-bottom: 10px;
+  }
+  
+  .btn-share {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .icon-share {
+    vertical-align: middle;
+  }
+  
+  .email-sent-message {
+    margin-top: 10px;
+  }
+  

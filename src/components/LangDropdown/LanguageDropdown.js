@@ -26,7 +26,11 @@ const LanguageDropdown = () => {
       setSelectedLanguage(savedLanguage);
       changeLanguage(savedLanguage);
     }
-  }, []);
+  }, [i18n.language]);
+
+  useEffect(() => {
+    setSelectedLanguage(i18n.language);
+  }, [i18n.language]);
 
   const handleChange = (event) => {
     const selectedCode = event.target.value;

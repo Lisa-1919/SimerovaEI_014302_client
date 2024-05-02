@@ -4,5 +4,19 @@
     margin-top: 7%;
     left: 50%;
     transform: translate(-50%, -7%);
-    display: block; 
+    display: inline-flex; 
+    justify-content: space-around;
+}
+
+.block{
+    display: block;
+    justify-items: center;
+}
+
+.block .btn{
+    font-size: 1em;
+}
+
+.change-password{
+    justify-items: center;
 }
