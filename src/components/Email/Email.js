@@ -1,10 +1,8 @@
 import * as React from 'react';
-import axios from 'axios';
+import AuthService from '../../services/auth.server';
 import { useTranslation } from "react-i18next";
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import authServer from '../../services/auth.server';
-
 
 export function Email({ roomID, senderEmail, onEmailSent }) {
   const location = useLocation();
@@ -15,7 +13,7 @@ export function Email({ roomID, senderEmail, onEmailSent }) {
 
   const sendEmail = () => {
     console.log(senderEmail);
-    authServer.sendEmail(emailTo, senderEmail,`Join the call! Room ID:${roomID}\n${message || ''}`)
+    AuthService.sendEmail(emailTo, senderEmail,`Join the call! Room ID:${roomID}\n${message || ''}`)
       .then((response) => {
         onEmailSent(response);
         console.log(response);

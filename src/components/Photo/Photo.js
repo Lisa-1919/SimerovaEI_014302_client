@@ -1,57 +1,57 @@
 import React, { useState } from 'react';
 import './photo.css';
 import { useTranslation } from "react-i18next";
-import AuthServer from '../../services/auth.server';
+import AuthService from '../../services/auth.server';
 import { IoAddOutline } from "react-icons/io5";
 
-const Photo = () => {
-    const { t } = useTranslation();
-    const [selectedImage, setSelectedImage] = useState(null);
+const Photo = ({ userImageUrl }) => {
+  const { t } = useTranslation();
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
-    const handleImageUpload = async (event) => {
-        const file = event.target.files[0];
-        const fileSizeLimit = 10 * 1024 * 1024; // 10MB in bytes
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    const fileSizeLimit = 10 * 1024 * 1024; // 10MB in bytes
 
-        if (file && file.size <= fileSizeLimit) {
-            const reader = new FileReader();
-            reader.onload = () => {
-                setSelectedImage(reader.result);
-            };
+    if (file && file.size <= fileSizeLimit) {
+      setSelectedImage(file);
+      setPreviewImage(URL.createObjectURL(file));
+      setErrorMessage("");
+    } else {
+      setErrorMessage("Please select another image. The file size should not exceed 10MB.");
+    }
+  };
 
-            reader.readAsDataURL(file);
-            try {
-                const response = await authServer.handleUpload(file);
-                console.log(response);
-            } catch (error) {
-                console.error(error);
-            }
-            setErrorMessage("");
-        } else {
-            setErrorMessage("Please select another image. The file size should not exceed 10MB.");
-        }
-    };
+  const handleCancelImage = () => {
+    setSelectedImage(null);
+    setPreviewImage(null);
+    setErrorMessage("");
+  };
 
-    const handleSaveImage = async () => {
-        if (selectedImage) {
-            try {
-                const response = await authServer.handleUpload(selectedImage);
-                console.log(response);
-            } catch (error) {
-                console.error(error);
-            }
-        }
-    };
+  const handleSaveImage = async () => {
+    if (selectedImage) {
+      try {
+        const response = await AuthService.uploadImage(selectedImage);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
 
   return (
     <div className='photo'>
       <div className="photo-container">
-        {selectedImage ? (
-          <img src={selectedImage} alt="Фото" className="rounded-photo" />
+        {userImageUrl ? (
+          <img src={'http://localhost:8080/images/'+ userImageUrl} alt="Фото" className="rounded-photo" />
         ) : (
           <div className="placeholder">{errorMessage || t("select_img")}</div>
         )}
+        {previewImage  && (
+          <img src={previewImage} alt="Предпросмотр" className="rounded-photo" />
+        )}
       </div>
+
       <label htmlFor="file-upload" className="upload-button">
         {t("upload")}
       </label>
@@ -63,9 +63,14 @@ const Photo = () => {
         className="select-img"
       />
       {selectedImage && (
-        <button onClick={handleSaveImage} className="save-button">
-          Save
-        </button>
+        <>
+          <button onClick={handleSaveImage} className="save-button">
+            Save
+          </button>
+          <button onClick={handleCancelImage} className="cancel-button">
+            Cancel
+          </button>
+        </>
       )}
     </div>
   );

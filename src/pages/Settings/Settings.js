@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from "react-i18next";
-import authServer from '../../services/auth.server';
+import AuthService from '../../services/auth.server';
 import Header from '../../components/Header/header';
 import './settings.css';
 import i18n from '../../18n';
@@ -16,7 +16,7 @@ const Settings = () => {
     const [languageMessage, setLanguageMessage] = useState('');
     const [languageSuccessful, setLanguageSuccessful] = useState(false);
     const { t } = useTranslation();
-    const user = authServer.getCurrentUser();
+    const user = AuthService.getCurrentUser();
     const navigate = useNavigate();
 
     const onChangePassword = (data) => {
@@ -24,7 +24,7 @@ const Settings = () => {
         setPasswordSuccessful(false);
 
         if (Object.keys(passwordErrors).length === 0) {
-            authServer.changePassword(user.username, data.oldPassword, data.newPassword)
+            AuthService.changePassword(user.username, data.oldPassword, data.newPassword)
                 .then(
                     (response) => {
                         setPasswordMessage(data.message);
@@ -44,7 +44,7 @@ const Settings = () => {
         setLanguageSuccessful(false);
         const selectedLanguage = i18n.language;
         if (Object.keys(languageErrors).length === 0) {
-            authServer.changeLanguage(user.username, selectedLanguage)
+            AuthService.changeLanguage(user.username, selectedLanguage)
                 .then(
                     (response) => {
                         setLanguageMessage(data.message);
@@ -60,7 +60,7 @@ const Settings = () => {
     };
 
     const onDeleteAccount = () => {
-        authServer.deleteAccount()
+        AuthService.deleteAccount()
             .then(
             (response) => {
                 navigate("/")

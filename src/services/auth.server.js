@@ -13,10 +13,9 @@ class AuthService {
       })
       .then(response => {
         if (response.data.accessToken) {
-          localStorage.setItem("user", JSON.stringify(response.data));
+          localStorage.setItem('user', JSON.stringify(response.data));
           i18n.changeLanguage(response.data.language);
         }
-
         return response.data;
       });
   }
@@ -36,7 +35,7 @@ class AuthService {
     //     return response.data;
     //     localStorage.removeItem("user");
     //   });    
-    localStorage.removeItem("user");
+    localStorage.removeItem('user');
   }
 
   deleteAccount() {
@@ -50,7 +49,7 @@ class AuthService {
         },
       })
       .then(response => {
-        localStorage.removeItem("user");
+        localStorage.removeItem('user');
         return response.data;
       })
       .catch(error => {
@@ -90,7 +89,7 @@ class AuthService {
       });
   }
 
-  sendEmail (emailTo, senderEmail, message) {
+  sendEmail(emailTo, senderEmail, message) {
     const options = {
       method: 'POST',
       url: 'https://mail-sender-api1.p.rapidapi.com/',
@@ -108,7 +107,7 @@ class AuthService {
         body: message
       }
     };
-  
+
     return axios.request(options)
       .then(response => response.data)
       .catch(error => error);
@@ -136,18 +135,21 @@ class AuthService {
   uploadImage(image) {
     const user = JSON.parse(localStorage.getItem('user'));
     const token = user.accessToken;
-    console.log(token);
     const formData = new FormData();
-    formData.append('image', image);
+    formData.append('image', image, image.name);
 
-    return axios.post(API_URL + "upload_img", formData, {
+    return axios.post(API_URL + "upload-image", formData, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'multipart/form-data',
       },
     })
       .then(response => {
-        return response.data;
+        user.imageUrl = response.data;
+        localStorage.setItem('user', JSON.stringify(user));
+      })
+      .catch(error => {
+        console.error("Upload failed:", error);
       });
   }
 

@@ -10,7 +10,7 @@ import { PiCamera, PiCameraSlash, PiMicrophone, PiMicrophoneSlash } from "react-
 import { MdCallEnd } from "react-icons/md";
 import { IoRocketSharp } from "react-icons/io5";
 import { RiUserSharedFill } from "react-icons/ri";
-import authServer from '../../services/auth.server';
+import AuthService from '../../services/auth.server';
 import SpeechRecognitionVideo from './SpeechRecogintion';
 import { Email } from '../../components/Email/Email';
 import { AiOutlineClose } from 'react-icons/ai';
@@ -18,7 +18,7 @@ import { AiOutlineClose } from 'react-icons/ai';
 
 export default function Room() {
   let navigate = useNavigate();
-  const user = authServer.getCurrentUser();
+  //const user = authServer.getCurrentUser();
   const selectedLanguage = i18n.language;
   const { id: roomID } = useParams();
   const { clients, provideMediaRef, handleLeave, toggleCamera, toggleMicrophone,
@@ -52,8 +52,8 @@ export default function Room() {
   }, [provideMediaRef]);
 
   const handleExitRoom = () => {
-    setEndTime(new Date());
-    authServer.saveCall(startTime, endTime);
+    //setEndTime(new Date());
+    //authServer.saveCall(startTime, endTime);
     handleLeave();
     navigate('/home');
   };
@@ -123,7 +123,7 @@ export default function Room() {
       <div className="share-room">
         {showEmailForm ? (
           <div className='share-email-form'>
-            <Email roomID={roomID} senderEmail={user.email} onEmailSent={handleEmailSent} />
+            {/* <Email roomID={roomID} senderEmail={user.email} onEmailSent={handleEmailSent} /> */}
             <button onClick={handleCloseForm} className='btn-close'><AiOutlineClose className='icon-close' /></button>
           </div>
         ) : (
@@ -150,7 +150,7 @@ export default function Room() {
                 muted={clientID === LOCAL_VIDEO}
               />
               {clientID !== LOCAL_VIDEO && (
-                <SpeechRecognitionVideo clientID={clientID} isLocalVideo={false} targetLanguage={user.language} />
+                <SpeechRecognitionVideo clientID={clientID} isLocalVideo={false} targetLanguage={selectedLanguage} />
               )}
 
               {clientID === LOCAL_VIDEO && (

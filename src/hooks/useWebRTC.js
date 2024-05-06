@@ -4,25 +4,25 @@ import socket from "../socket";
 import ACTIONS from "../socket/actions";
 import useStateWithCallback from "./useStateWithCallback";
 import i18n from "../18n";
-import AuthService from "../services/auth.server";
+import AuthService from '../services/auth.server';
 import axios from 'axios';
 import socketIOClient from 'socket.io-client';
 
 
-const translateMessage = async (message, translationLanguage) => {
-    try {
-        const response = await axios.post('http://localhost:5000/translate-message', {
-            message,
-            translationLanguage,
-        });
-        return response.data.translatedMessage;
-    } catch (error) {
-        return message;
-       // throw new Error('Failed to translate message');
-        return message;
-       // throw new Error('Failed to translate message');
-    }
-};
+// const translateMessage = async (message, translationLanguage) => {
+//     try {
+//         const response = await axios.post('http://localhost:5000/translate-message', {
+//             message,
+//             translationLanguage,
+//         });
+//         return response.data.translatedMessage;
+//     } catch (error) {
+//         return message;
+//        // throw new Error('Failed to translate message');
+//         return message;
+//        // throw new Error('Failed to translate message');
+//     }
+// };
 
 export const LOCAL_VIDEO = 'LOCAL_VIDEO';
 export default function useWebRTC(roomID) {
@@ -76,11 +76,11 @@ export default function useWebRTC(roomID) {
     }, [translationLanguage]);
 
     const handleIncomingMessage = useCallback(async (message) => {
-        const translatedMessage = await translateMessage(message, translationLanguage);
-        if (translatedMessage) {
-            setMessages(prevMessages => [...prevMessages, translatedMessage]);
-        }
-        // setMessages(prevMessages => [...prevMessages, message]);
+        // const translatedMessage = await translateMessage(message, translationLanguage);
+        // if (translatedMessage) {
+        //     setMessages(prevMessages => [...prevMessages, translatedMessage]);
+        // }
+        setMessages(prevMessages => [...prevMessages, message]);
     }, [translationLanguage]);
     
 

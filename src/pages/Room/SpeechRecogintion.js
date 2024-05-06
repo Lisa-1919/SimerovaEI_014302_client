@@ -3,18 +3,18 @@ import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognitio
 import axios from 'axios';
 import './speech-recognition-video.css';
 
-const translate = async (message, translationLanguage) => {
-    try {
-        const response = await axios.post('http://localhost:5000/translate-message', {
-            message,
-            translationLanguage,
-        });
-        return response.data.translatedMessage;
-    } catch (error) {
-        return message;
-       // throw new Error('Failed to translate message');
-    }
-};
+// const translate = async (message, translationLanguage) => {
+//     try {
+//         const response = await axios.post('http://localhost:5000/translate-message', {
+//             message,
+//             translationLanguage,
+//         });
+//         return response.data.translatedMessage;
+//     } catch (error) {
+//         return message;
+//        // throw new Error('Failed to translate message');
+//     }
+// };
 const SpeechRecognitionVideo = ({ clientID, isLocalVideo, targetLanguage }) => {
     const [message, setMessage] = useState('');
     const {
@@ -40,9 +40,10 @@ const SpeechRecognitionVideo = ({ clientID, isLocalVideo, targetLanguage }) => {
     const translateAndDisplay = async (text, targetLanguage) => {
         if (text.trim() !== '') {
             try {
-                const translatedText = await translate(text, targetLanguage);
-                console.log('Translated text:', translatedText);
-                setMessage(translatedText);
+                // const translatedText = await translate(text, targetLanguage);
+                // console.log('Translated text:', translatedText);
+                // setMessage(translatedText);
+                setMessage(text);
             } catch (error) {
                 console.error('Translation error:', error);
             }

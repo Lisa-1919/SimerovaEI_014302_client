@@ -16,7 +16,6 @@ const Login = () => {
   const onSubmit = (data) => {
     setMessage('');
     setSuccessful(false);
-  
     if (Object.keys(errors).length === 0) {
       AuthService.login(data.username, data.password)
         .then(() => {

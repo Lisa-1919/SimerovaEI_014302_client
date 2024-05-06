@@ -10,6 +10,7 @@
 .user-info{
     height: max-content;
     display: inline-flex;
+    margin-top: 5%;
     margin-bottom: 2%;
 }
 
