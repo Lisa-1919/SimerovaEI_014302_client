@@ -9,20 +9,17 @@ import axios from 'axios';
 import socketIOClient from 'socket.io-client';
 
 
-// const translateMessage = async (message, translationLanguage) => {
-//     try {
-//         const response = await axios.post('http://localhost:5000/translate-message', {
-//             message,
-//             translationLanguage,
-//         });
-//         return response.data.translatedMessage;
-//     } catch (error) {
-//         return message;
-//        // throw new Error('Failed to translate message');
-//         return message;
-//        // throw new Error('Failed to translate message');
-//     }
-// };
+const translateMessage = async (text, translationLanguage) => {
+    try {
+        const response = await axios.post('http://localhost:5000/translate-message', {
+            text,
+            translationLanguage,
+        });
+        return response.data.translatedMessage;
+    } catch (error) {
+        return text;
+    }
+};
 
 export const LOCAL_VIDEO = 'LOCAL_VIDEO';
 export default function useWebRTC(roomID) {
@@ -67,22 +64,23 @@ export default function useWebRTC(roomID) {
 
     const sendMessage = useCallback(async (message) => {
         Object.keys(peerConnections.current).forEach((peerID) => {
-            const dataChannel = peerConnections.current[peerID].createDataChannel('chat');
-            dataChannel.onopen = () => {
-                dataChannel.send(message);
-            };
+            const dataChannel = peerConnections.current[peerID].dataChannel;
+            if (dataChannel) {
+                dataChannel.send(JSON.stringify(message));
+            }
         });
-        setMessages(prevMessages => [...prevMessages, message]);
-    }, [translationLanguage]);
+        setMessages((prevMessages) => [...prevMessages, message]);
+    }, []);
 
     const handleIncomingMessage = useCallback(async (message) => {
-        // const translatedMessage = await translateMessage(message, translationLanguage);
-        // if (translatedMessage) {
-        //     setMessages(prevMessages => [...prevMessages, translatedMessage]);
-        // }
-        setMessages(prevMessages => [...prevMessages, message]);
+        const messageJSON = JSON.parse(message);
+        const translatedMessage = await translateMessage(messageJSON.text, translationLanguage);
+        if (translatedMessage) {
+            messageJSON.text = translatedMessage;
+            setMessages(prevMessages => [...prevMessages, messageJSON]);
+        }
     }, [translationLanguage]);
-    
+
 
     useEffect(() => {
         async function handleNewPeer({ peerID, createOffer }) {
@@ -103,9 +101,12 @@ export default function useWebRTC(roomID) {
                 }
             }
             const dataChannel = peerConnections.current[peerID].createDataChannel('chat');
+            peerConnections.current[peerID].dataChannel = dataChannel;
+
             dataChannel.onopen = () => {
                 console.log('Data channel is open');
             };
+
             dataChannel.onmessage = (event) => {
                 handleIncomingMessage(event.data);
             };
@@ -230,9 +231,6 @@ export default function useWebRTC(roomID) {
                     localVideoElement.srcObject = localMediaStream.current;
                 }
             });
-
-          
-              
         }
 
         startCapture()
@@ -253,6 +251,9 @@ export default function useWebRTC(roomID) {
     }, []);
 
     const handleLeave = useCallback(() => {
+        if (localMediaStream.current) {
+            localMediaStream.current.getTracks().forEach(track => track.stop());
+        }
         socket.emit(ACTIONS.LEAVE);
     }, []);
 

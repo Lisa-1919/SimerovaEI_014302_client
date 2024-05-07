@@ -8,17 +8,18 @@ import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognitio
 import i18n from '../../18n';
 import { PiCamera, PiCameraSlash, PiMicrophone, PiMicrophoneSlash } from "react-icons/pi";
 import { MdCallEnd } from "react-icons/md";
-import { IoRocketSharp } from "react-icons/io5";
+
 import { RiUserSharedFill } from "react-icons/ri";
 import AuthService from '../../services/auth.server';
 import SpeechRecognitionVideo from './SpeechRecogintion';
 import { Email } from '../../components/Email/Email';
 import { AiOutlineClose } from 'react-icons/ai';
+import Chat from '../../components/Chat/Chat';
 
 
 export default function Room() {
   let navigate = useNavigate();
-  //const user = authServer.getCurrentUser();
+  const user = AuthService.getCurrentUser();
   const selectedLanguage = i18n.language;
   const { id: roomID } = useParams();
   const { clients, provideMediaRef, handleLeave, toggleCamera, toggleMicrophone,
@@ -31,11 +32,13 @@ export default function Room() {
   const [subtitlesEnabled, setSubtitlesEnabled] = useState(false);
   const [currentSubtitle, setCurrentSubtitle] = useState('');
 
-  const [inputMessage, setInputMessage] = useState("");
-  const [textareaHeight, setTextareaHeight] = useState("auto");
-
-  // const [startTime, setStartTime] = useState(null);
-  // const [endTime, setEndTime] = useState(null);
+  const [inputMessage, setInputMessage] = useState('');
+  
+  const [callInfo, setCallInfo] = useState({
+    roomId: roomID,
+    startTime: new Date(),
+    endTime: null
+  });
 
   // const saveCallInfo = useCallback(() => {
   //   const callInfo = {
@@ -52,8 +55,10 @@ export default function Room() {
   }, [provideMediaRef]);
 
   const handleExitRoom = () => {
-    //setEndTime(new Date());
-    //authServer.saveCall(startTime, endTime);
+    // AuthService.saveCall({
+    //   ...callInfo,
+    //   endTime: new Date()  // Update the endTime before saving
+    // });
     handleLeave();
     navigate('/home');
   };
@@ -68,15 +73,14 @@ export default function Room() {
     toggleMicrophone();
   };
   const handleSendMessage = () => {
-    sendMessage(inputMessage);
-    setInputMessage("");
-  };
+    const messageObject = {
+      username: user.username,
+      text: inputMessage,
+    };
 
-  const handleTextareaChange = (event) => {
-    event.target.style.height = "auto";
-    event.target.style.height = event.target.scrollHeight + "px";
+    sendMessage(messageObject);
+    setInputMessage('');
   };
-
 
   const handleToggleSubtitles = () => {
     setSubtitlesEnabled(prevState => !prevState);
@@ -110,20 +114,18 @@ export default function Room() {
   const handleCloseForm = () => {
     setShowEmailForm(false);
   };
-  
 
   const handleEmailSent = () => {
     setEmailSentMessage(emailSentMessage);
     setShowEmailForm(false);
   };
 
-
   return (
     <div className="room">
       <div className="share-room">
         {showEmailForm ? (
           <div className='share-email-form'>
-            {/* <Email roomID={roomID} senderEmail={user.email} onEmailSent={handleEmailSent} /> */}
+            <Email roomID={roomID} senderEmail={user.email} onEmailSent={handleEmailSent} />
             <button onClick={handleCloseForm} className='btn-close'><AiOutlineClose className='icon-close' /></button>
           </div>
         ) : (
@@ -134,7 +136,6 @@ export default function Room() {
         )}
         {emailSentMessage && <div>{emailSentMessage}</div>}
       </div>
-
       <div className="call">
         {clients.map((clientID, index) => {
           return (
@@ -168,25 +169,14 @@ export default function Room() {
           );
         })}
       </div>
-      <div className='chat'>
-        <div className="messages">
-          {messages.slice(0).reverse().map((message, index) => (
-            <div key={index} className='message'>{message}</div>
-          ))}
-        </div>
-        <div className="input-message">
-          <textarea
-            value={inputMessage}
-            onChange={(e) => {
-              setInputMessage(e.target.value);
-              handleTextareaChange(e);
-            }}
-            style={{ height: textareaHeight }}
-          />
-          <button className='btn-send-message' onClick={handleSendMessage}><IoRocketSharp className='icon-send' /></button>
-        </div>
-      </div>
-
+      <Chat
+        messages={messages}
+        user={user}
+        inputMessage={inputMessage}
+        setInputMessage={setInputMessage}
+        handleSendMessage={handleSendMessage}
+        className='chat'
+      />
     </div>
   );
 }

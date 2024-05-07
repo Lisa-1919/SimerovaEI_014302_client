@@ -1,7 +1,6 @@
 .room {
     width: 100%;
     height: 100%;
-    display: flex;
     justify-content: flex-start;
 }
 
@@ -53,10 +52,10 @@ video {
     justify-content: center;
 }
 
-.btn-action{
+.btn-action {
     width: 3vw;
     height: 3vw;
-margin: 2px;
+    margin: 2px;
     background-color: transparent;
     border-radius: 50%;
     border: none;
@@ -90,80 +89,20 @@ margin: 2px;
     padding: 10px;
 }
 
-.messages {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column-reverse;
-    overflow-y: auto;
-}
-
-.message {
-    color: #6F8CF5;
-    word-wrap: break-word;
-    display: inline-block;
-    padding: 10px;
-    border: 1px solid #BFA181;
-    border-radius: 23px;
-    margin-bottom: 5%;
-    max-width: 85%;
-}
-
-.input-message {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 10px;
-}
-
-.input-message textarea {
-    max-height: 30vh;
-    width: 85%;
-    color: #BFA181;
-    background: transparent;
-    border-radius: 15px;
-    border: 1px solid #BFA181;
-    font-family: 'Comfortaa';
-    font-size: 1vw;
-    text-align: left;
-    resize: none;
-    overflow-y: auto;
-}
-
-.input-message textarea:focus {
-    outline: #BFA181;
-}
-
-
-.icon-send:hover, .icon-share:hover {
-    color: #BFA181;
-}
-
-.btn-send-message {
-    position: absolute;
-    bottom: 6px;
-    right: 2px;
-    width: 3vw;
-    height: 3vw;
+.btn-share {
     background-color: transparent;
     border-radius: 50%;
     border: none;
     cursor: pointer;
 }
 
-.btn-share{
-    background-color: transparent;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-}
-
-.transcript{
+.transcript {
 
     display: flex;
     flex-wrap: wrap;
 }
 
-.subtitles{
+.subtitles {
     width: 80%;
     height: 80%;
     color: white;
@@ -172,31 +111,30 @@ margin: 2px;
 .share-room {
     display: flex;
     flex-direction: column;
-  }
-  
-  .room-id {
+}
+
+.room-id {
     font-weight: bold;
     margin-bottom: 10px;
-  }
-  
-  .share-email-form {
+}
+
+.share-email-form {
     margin-bottom: 10px;
-  }
-  
-  .btn-share {
+}
+
+.btn-share {
     background-color: #007bff;
     color: white;
     border: none;
     padding: 5px 10px;
     border-radius: 5px;
     cursor: pointer;
-  }
-  
-  .icon-share {
+}
+
+.icon-share {
     vertical-align: middle;
-  }
-  
-  .email-sent-message {
+}
+
+.email-sent-message {
     margin-top: 10px;
-  }
-  
+}

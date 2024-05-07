@@ -8,46 +8,6 @@ import AuthService from '../../services/auth.server';
 import LanguageDropdown from '../../components/LangDropdown/LanguageDropdown';
 
 
-const email = (value) => {
-  if (!isEmail(value)) {
-    return (
-      <div className="alert alert-danger" role="alert">
-        {/* {t("v_email")} */}
-      </div>
-    );
-  }
-};
-
-const vusername = (value) => {
-  if (value.length < 3 || value.length > 20) {
-    return (
-      <div className="alert alert-danger" role="alert">
-        {/* {t("v_login")} */}
-      </div>
-    );
-  }
-};
-
-const vpassword = (value) => {
-  if (value.length < 6 || value.length > 40) {
-    return (
-      <div className="alert alert-danger" role="alert">
-        {/* {t("v_password")} */}
-      </div>
-    );
-  }
-};
-
-const vpassword_confirm = (value) => {
-  if (value.length < 6 || value.length > 40) {
-    return (
-      <div className="alert alert-danger" role="alert">
-        {/* {t("v_confirm_p")} */}
-      </div>
-    );
-  }
-};
-
 const Registration = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [message, setMessage] = useState('');
@@ -60,6 +20,16 @@ const Registration = () => {
     setSuccessful(false);
 
     if (Object.keys(errors).length === 0) {
+
+      if (data.password.length < 8) {
+        setMessage("Password must be at least 8 characters long.");
+        return;
+      }
+      if (data.password !== data.password_confirm) {
+        setMessage("Passwords do not match.");
+        return;
+      }
+
       AuthService.register(data.username, data.email, data.password)
         .then(
           (response) => {
@@ -78,7 +48,7 @@ const Registration = () => {
 
   return (
     <div>
-      <LanguageDropdown/>
+      <LanguageDropdown />
       <form onSubmit={handleSubmit(onSubmit)}>
         {!successful && (
           <div className='registration'>
@@ -90,37 +60,32 @@ const Registration = () => {
                     type="text"
                     name="username"
                     placeholder={t("login")}
-                    {...register('username', { required: true, validate: vusername })}
+                    {...register('username', { required: true })}
                   />
-                  {errors.username && <p>{errors.username.message}</p>}
                 </div>
-
                 <div className="form-group">
                   <input
                     type="text"
                     placeholder={t("email")}
                     name="email"
-                    {...register('email', { required: true, validate: email })}
+                    {...register('email', { required: true })}
                   />
-                  {errors.email && <p>{errors.email.message}</p>}
                 </div>
                 <div className="form-group">
                   <input
                     type="password"
                     name="password"
                     placeholder={t("password")}
-                    {...register('password', { required: true, validate: vpassword })}
+                    {...register('password', { required: true })}
                   />
-                  {errors.password && <p>{errors.password.message}</p>}
                 </div>
                 <div className="form-group">
                   <input
                     type="password"
                     name="password_confirm"
                     placeholder={t("confirm_p")}
-                    {...register('password_confirm', { required: true, validate: vpassword })}
+                    {...register('password_confirm', { required: true })}
                   />
-                  {errors.password && <p>{errors.password.message}</p>}
                 </div>
               </div>
               <div className='link'>

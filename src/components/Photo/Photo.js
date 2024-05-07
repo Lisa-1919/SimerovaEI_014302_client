@@ -36,19 +36,19 @@ const Photo = ({ userImageUrl }) => {
       } catch (error) {
         console.error(error);
       }
+      setSelectedImage(null);
     }
   };
 
   return (
     <div className='photo'>
       <div className="photo-container">
-        {userImageUrl ? (
-          <img src={'http://localhost:8080/images/'+ userImageUrl} alt="Фото" className="rounded-photo" />
-        ) : (
-          <div className="placeholder">{errorMessage || t("select_img")}</div>
-        )}
-        {previewImage  && (
+        {previewImage ? (
           <img src={previewImage} alt="Предпросмотр" className="rounded-photo" />
+        ) : userImageUrl ? (
+          <img src={`http://localhost:8080/images/${userImageUrl}`} alt="Фото" className="rounded-photo" />
+        ) : (
+          <img src={'http://localhost:8080/images/default.jpg'} alt="Загрузить Фото" className="rounded-photo" />
         )}
       </div>
 

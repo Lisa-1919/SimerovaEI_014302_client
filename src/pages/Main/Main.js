@@ -32,7 +32,13 @@ function Main() {
 
                     <div ref={rootNode}>
                         <div className='join'>
-                            <input type='text' value={room_id} onChange={(e) => setRoomId(e.target.value)} placeholder={t("room_id")} />
+                            <input type='text' value={room_id} onChange={(e) => setRoomId(e.target.value)} placeholder={t("room_id")} 
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                              e.preventDefault(); 
+                                              navigate(`/room/${room_id}`);
+                                            }
+                                          }}/>
                             <button className='btn' onClick={() => {
                                 navigate(`/room/${room_id}`);
                             }}>{t("join_room")}</button>
