@@ -6,8 +6,7 @@ import { useTranslation } from "react-i18next";
 import './main.css';
 import AuthService from '../../services/auth.server';
 import Photo from '../../components/Photo/Photo';
-
-
+import CallHistory from '../../components/CallHistory/CallHistory';
 
 function Main() {
     let navigate = useNavigate();
@@ -27,7 +26,7 @@ function Main() {
                         <p className='user-data-text'>{user.email}</p>
                     </div>
                 </div>
-
+                <CallHistory calls={user.callHistoryList} />
                 <div className='room_actions'>
 
                     <div ref={rootNode}>

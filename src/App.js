@@ -8,7 +8,6 @@ import Login from './pages/Login/Login';
 import AuthGuard from './services/auth.guard';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './18n';
-import SubtitleGenerator from './pages/SubtitleGenerator';
 import Settings from './pages/Settings/Settings';
 
 function App() {

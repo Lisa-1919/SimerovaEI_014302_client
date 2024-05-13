@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { isEmail } from "validator";
 import './Registration.css';
 import { useTranslation } from "react-i18next";
 import { useNavigate } from 'react-router-dom';

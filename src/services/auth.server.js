@@ -158,11 +158,12 @@ class AuthService {
     const token = user.accessToken;
     return axios.post(API_URL + 'save-call', callInfo, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        'Authorization': `Bearer ${token}`,
       },
     })
       .then(response => {
-        return response.data;
+        user.callHistoryList = response.data;
+        localStorage.setItem('user', JSON.stringify(user));
       });
   }
 }

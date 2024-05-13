@@ -60,17 +60,23 @@ const Settings = () => {
     };
 
     const onDeleteAccount = () => {
-        AuthService.deleteAccount()
-            .then(
-            (response) => {
-                navigate("/")
-            },
-            (error) => {
-                const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
-                setPasswordMessage(resMessage);
-                setPasswordSuccessful(false);
-            }
-        );
+        const confirmationPhrase = `${user.username}-delete`;
+        const userInput = prompt('Please type the confirmation phrase to delete your account:');
+        if (userInput === confirmationPhrase) {
+            AuthService.deleteAccount()
+                .then(
+                    (response) => {
+                        navigate("/");
+                    },
+                    (error) => {
+                        const resMessage = (error.response && error.response.data && error.response.data.message) || error.message || error.toString();
+                        setPasswordMessage(resMessage);
+                        setPasswordSuccessful(false);
+                    }
+                );
+        } else {
+            alert('Confirmation phrase does not match. Account deletion canceled.');
+        }
         
     };
 
