@@ -41,16 +41,6 @@ export default function Room() {
     language: i18n.language
   });
 
-  // const saveCallInfo = useCallback(() => {
-  //   const callInfo = {
-  //     startTime: startTime,
-  //     endTime: endTime,
-  //     roomID: roomID,
-  //   };
-
-  //   authServer.saveCall(callInfo);
-  // }, [startTime, endTime]);
-
   const handleProvideMediaRef = useCallback((clientID, instance) => {
     provideMediaRef(clientID, instance);
   }, [provideMediaRef]);
@@ -58,7 +48,7 @@ export default function Room() {
   const handleExitRoom = () => {
     AuthService.saveCall({
       ...callInfo,
-      endTime: new Date()  // Update the endTime before saving
+      endTime: new Date()  
     });
     handleLeave();
     navigate('/home');

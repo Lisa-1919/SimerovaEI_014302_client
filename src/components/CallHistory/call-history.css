@@ -1,0 +1,8 @@
+.call-history{
+    margin: auto;
+    width: 60%;
+    text-align: center;
+    border: none;
+    border-radius: 6px;
+    background: rgba(30, 75, 126, 0.38);;
+}

@@ -3,6 +3,7 @@ import AuthService from '../../services/auth.server';
 import { useTranslation } from "react-i18next";
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import { IoRocketSharp } from "react-icons/io5";
 
 export function Email({ roomID, senderEmail, onEmailSent }) {
   const location = useLocation();
@@ -24,16 +25,16 @@ export function Email({ roomID, senderEmail, onEmailSent }) {
   };
 
 return (
-  <div style={{ backgroundColor: "white" }}>
+  <div className="email-form">
     <div>
-      <label>{t("email")}</label>
-      <input type="email" value={emailTo} onChange={(e) => setEmail(e.target.value)} />
+      <input type="email" value={emailTo} onChange={(e) => setEmail(e.target.value)} placeholder="Send email to"/>
     </div>
     <div>
-      <label>{t("message")}</label>
-      <textarea value={message} onChange={(e) => setMessage(e.target.value)} />
+      <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Input message"/>
     </div>
-    <button onClick={sendEmail}>{t("send")}</button>
+    <button className='btn-send-email' onClick={sendEmail}>
+          <IoRocketSharp className='icon-send' />
+        </button>
   </div>
 );
 }

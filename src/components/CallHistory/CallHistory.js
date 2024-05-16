@@ -1,5 +1,6 @@
 import React from 'react';
 import {useTable} from 'react-table';
+import './call-history.css';
 
 function CallHistory({ calls }) {
     const data = React.useMemo(() => calls, [calls]);
@@ -41,7 +42,7 @@ function CallHistory({ calls }) {
     } = useTable({ columns, data });
 
     return (
-        <table {...getTableProps()} style={{ margin: 'auto', width: '80%', textAlign: 'center' }}>
+        <table {...getTableProps()} className="call-history">
             <thead>
                 {headerGroups.map(headerGroup => (
                     <tr {...headerGroup.getHeaderGroupProps()}>
