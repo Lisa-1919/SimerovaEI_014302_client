@@ -22,8 +22,8 @@ function Main() {
                 <div className='user-info'>
                     <Photo userImageUrl={user.imageUrl}/>
                     <div className='text'>
-                        <p className='user-data-text'>{user.username}</p>
-                        <p className='user-data-text'>{user.email}</p>
+                        <p className='username'>{user.username}</p>
+                        <p className='email'>{user.email}</p>
                     </div>
                 </div>
                 <CallHistory calls={user.callHistoryList} />

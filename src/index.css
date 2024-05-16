@@ -30,7 +30,11 @@ body {
   cursor: pointer;
 }
 
-input {
+.btn:hover{
+  background-color: #6F8CF5;
+}
+
+.input {
   width: 318.635px;
   height: 41.493px;
   border-top: 0;

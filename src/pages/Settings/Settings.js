@@ -7,6 +7,7 @@ import './settings.css';
 import i18n from '../../18n';
 import LanguageDropdown from '../../components/LangDropdown/LanguageDropdown';
 import { useNavigate } from 'react-router-dom';
+import Modal from 'react-modal';
 
 const Settings = () => {
     const { register: passwordRegister, handleSubmit: handlePasswordSubmit, formState: { errors: passwordErrors } } = useForm();
@@ -18,6 +19,10 @@ const Settings = () => {
     const { t } = useTranslation();
     const user = AuthService.getCurrentUser();
     const navigate = useNavigate();
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [userInput, setUserInput] = useState('');
+    const confirmationPhrase = `${user.username}-delete`;
+
 
     const onChangePassword = (data) => {
         setPasswordMessage('');
@@ -60,8 +65,6 @@ const Settings = () => {
     };
 
     const onDeleteAccount = () => {
-        const confirmationPhrase = `${user.username}-delete`;
-        const userInput = prompt('Please type the confirmation phrase to delete your account:');
         if (userInput === confirmationPhrase) {
             AuthService.deleteAccount()
                 .then(
@@ -77,7 +80,11 @@ const Settings = () => {
         } else {
             alert('Confirmation phrase does not match. Account deletion canceled.');
         }
-        
+        setModalIsOpen(false);
+    };
+
+    const openModal = () => {
+        setModalIsOpen(true);
     };
 
     return (
@@ -92,6 +99,7 @@ const Settings = () => {
                                 <input
                                     type="password"
                                     id="oldPassword"
+                                    className="input"
                                     placeholder={t("old-password")}
                                     {...passwordRegister("oldPassword", { required: true })}
                                 />
@@ -101,6 +109,7 @@ const Settings = () => {
                                 <input
                                     type="password"
                                     id="newPassword"
+                                    className="input"
                                     placeholder={t("new-password")}
                                     {...passwordRegister("newPassword", { required: true })}
                                 />
@@ -133,8 +142,23 @@ const Settings = () => {
                     </form>
                 </div>
                 <div className='block'>
-                    <button className='btn' onClick={onDeleteAccount}>{t("delete")}</button>
+                    <button className='btn' onClick={openModal}>{t("delete")}</button>
                 </div>
+                <Modal isOpen={modalIsOpen} onRequestClose={() => setModalIsOpen(false)}
+                    className="Modal"
+                    overlayClassName="Overlay"
+                >
+                    <h2>Please type the confirmation phrase to delete your account:</h2>
+                    <input
+                        type="text"
+                        className="input"
+                        placeholder={confirmationPhrase}
+                        value={userInput}
+                        onChange={e => setUserInput(e.target.value)}
+                    />
+                    <button onClick={onDeleteAccount} className="btn">Confirm</button>
+                    <button onClick={() => setModalIsOpen(false)} className="btn">Cancel</button>
+                </Modal>
             </div>
         </div>
     );

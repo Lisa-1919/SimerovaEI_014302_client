@@ -19,9 +19,15 @@
 }
 
 .user-data-text{
-    font-size: 1.5em;
+
     width: auto;
     height: fit-content;
+}
+.username{
+    font-size: 1.5em;
+}
+.email{
+    font-size: 1.1em;
 }
 
 .join{

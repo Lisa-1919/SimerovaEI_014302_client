@@ -1,4 +1,7 @@
 .call-history{
+    position: absolute;
+    top: 22%;
+    right: 0;
     margin: auto;
     width: 60%;
     text-align: center;

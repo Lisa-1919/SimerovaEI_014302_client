@@ -58,6 +58,7 @@ const Registration = () => {
                   <input
                     type="text"
                     name="username"
+                    className="input"
                     placeholder={t("login")}
                     {...register('username', { required: true })}
                   />
@@ -67,6 +68,7 @@ const Registration = () => {
                     type="text"
                     placeholder={t("email")}
                     name="email"
+                    className="input"
                     {...register('email', { required: true })}
                   />
                 </div>
@@ -74,6 +76,7 @@ const Registration = () => {
                   <input
                     type="password"
                     name="password"
+                    className="input"
                     placeholder={t("password")}
                     {...register('password', { required: true })}
                   />
@@ -81,6 +84,7 @@ const Registration = () => {
                 <div className="form-group">
                   <input
                     type="password"
+                    className="input"
                     name="password_confirm"
                     placeholder={t("confirm_p")}
                     {...register('password_confirm', { required: true })}

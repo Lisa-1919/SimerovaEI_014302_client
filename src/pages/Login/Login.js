@@ -44,6 +44,7 @@ const Login = () => {
               <div className='inputs'>
                 <div className="form-group">
                   <input
+                  className="input"
                     type="text"
                     name="username"
                     placeholder={t("login")}
@@ -53,6 +54,7 @@ const Login = () => {
                 </div>
                 <div className="form-group">
                   <input
+                  className="input"
                     type="password"
                     name="password"
                     placeholder={t("password")}

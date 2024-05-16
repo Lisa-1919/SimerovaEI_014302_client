@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
-import axios from 'axios';
+//import axios from 'axios';
 import './speech-recognition-video.css';
 
 // const translate = async (message, translationLanguage) => {
@@ -18,10 +18,10 @@ import './speech-recognition-video.css';
 const SpeechRecognitionVideo = ({ clientID, isLocalVideo, targetLanguage }) => {
     const [message, setMessage] = useState('');
     const {
-        transcript,
-        interimTranscript,
+        // transcript,
+        // interimTranscript,
         finalTranscript,
-        translatedText,
+        //translatedText,
         resetTranscript,
         listening,
     } = useSpeechRecognition();

@@ -4,10 +4,8 @@ import socket from "../socket";
 import ACTIONS from "../socket/actions";
 import useStateWithCallback from "./useStateWithCallback";
 import i18n from "../18n";
-import AuthService from '../services/auth.server';
 import axios from 'axios';
-import socketIOClient from 'socket.io-client';
-
+import RecordRTC from 'recordrtc';
 
 const translateMessage = async (text, translationLanguage) => {
     try {
@@ -27,8 +25,7 @@ export default function useWebRTC(roomID) {
     const [isCameraOn, setCameraOn] = useState(true);
     const [isMicrophoneOn, setMicrophoneOn] = useState(true);
     const [messages, setMessages] = useState([]);
-    const selectedLanguage = i18n.language;
-    const [translationLanguage, setTranslationLanguage] = useState(i18n.language);
+    const translationLanguage= useState(i18n.language);
     const [secondParticipantInfo, setSecondParticipantInfo] = useState(null);
     const addNewClient = useCallback((newClient, cb) => {
         updateClients(list => {
@@ -118,6 +115,33 @@ export default function useWebRTC(roomID) {
             };
             let tracksNumber = 0;
 
+            let recorder;
+            let recordingInterval;
+            let incomingStream = null;
+            
+            function startRecording(stream) {
+                let audioStream = new MediaStream(stream.getAudioTracks());
+                incomingStream = audioStream;
+                recorder = RecordRTC(incomingStream, {type:'audio', recorderType: RecordRTC.StereoAudioRecorder});
+                recorder.startRecording();
+                recordingInterval = setInterval(stopRecording, 10000);
+            }
+            
+            async function stopRecording() {
+                recorder.stopRecording(async function() {
+                    let blob = recorder.getBlob();
+                    let formData = new FormData();
+                    formData.append('audio', blob);
+                    formData.append('translationLanguage', translationLanguage);
+                    const response = await fetch('http://localhost:5000/generate-subtitles', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+                    console.log(data.subtitles);
+                    startRecording(incomingStream);
+                });
+            }
             peerConnections.current[peerID].ontrack = ({ streams: [remoteStream] }) => {
                 tracksNumber++
                 if (tracksNumber === 2) {
@@ -141,6 +165,8 @@ export default function useWebRTC(roomID) {
                     });
 
                 }
+                console.log(remoteStream.getAudioTracks());
+                startRecording(remoteStream);
             }
             localMediaStream.current.getTracks().forEach(track => {
                 peerConnections.current[peerID].addTrack(track, localMediaStream.current);
@@ -240,7 +266,6 @@ export default function useWebRTC(roomID) {
         return () => {
             if (localMediaStream.current) {
                 localMediaStream.current.getTracks().forEach(track => track.stop());
-                // SpeechRecognition.stopListening();
                 socket.emit(ACTIONS.LEAVE);
             }
         };
@@ -275,69 +300,3 @@ export default function useWebRTC(roomID) {
         sendMessage,
     };
 }
-
-// useEffect(() => {
-//     // ... (ваш существующий код)
-
-//     // Функция для отправки видеопотока на сервер для перевода
-//     const sendVideoForTranslation = (videoBlob) => {
-//         const socket = new WebSocket('ws://your-translation-server-url');
-//         socket.onopen = () => {
-//             // Отправка видеопотока на сервер
-//             socket.send(videoBlob);
-//         };
-//         socket.onmessage = (event) => {
-//             // Обработка полученного переведенного видеопотока
-//             const translatedVideoBlob = event.data;
-//             // Действия с переведенным видеопотоком, например, отображение его в элементе video
-//         };
-//     };
-
-//     // Модифицированная функция startCapture с отправкой видеопотока на сервер для перевода
-//     async function startCapture() {
-//         try {
-//             localMediaStream.current = await navigator.mediaDevices.getUserMedia({
-//                 audio: true,
-//                 video: {
-//                     width: 1200,
-//                     height: 720
-//                 }
-//             });
-
-//             // Convert the video stream to a Blob
-//             const mediaRecorder = new MediaRecorder(localMediaStream.current);
-//             const chunks = [];
-//             mediaRecorder.ondataavailable = e => chunks.push(e.data);
-//             mediaRecorder.onstop = () => {
-//                 const videoBlob = new Blob(chunks, { type: chunks[0].type });
-//                 // Отправка видеопотока на сервер для перевода
-//                 sendVideoForTranslation(videoBlob);
-//             };
-//             // Start recording the video stream
-//             mediaRecorder.start();
-
-//         } catch (err) {
-//             console.error("Error capturing local stream", err);
-//             return;
-//         }
-//         addNewClient(LOCAL_VIDEO, () => {
-//             const localVideoElement = peerMediaElements.current[LOCAL_VIDEO];
-//             if (localVideoElement) {
-//                 localVideoElement.volume = 0;
-//                 localVideoElement.srcObject = localMediaStream.current;
-//             }
-//         });
-//     }
-
-//     startCapture()
-//         .then(() => socket.emit(ACTIONS.JOIN, { room: roomID }))
-//         .catch(e => console.error('Error getting userMedia:', e));
-
-//     return () => {
-//         if (localMediaStream.current) {
-//             localMediaStream.current.getTracks().forEach(track => track.stop());
-
-//             socket.emit(ACTIONS.LEAVE);
-//         }
-//     };
-// }, [roomID]);
