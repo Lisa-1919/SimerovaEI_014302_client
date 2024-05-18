@@ -6,6 +6,7 @@ import useStateWithCallback from "./useStateWithCallback";
 import i18n from "../18n";
 import axios from 'axios';
 import RecordRTC from 'recordrtc';
+import SpeechRecognition, {useSpeechRecognition} from 'react-speech-recognition';
 
 const translateMessage = async (text, translationLanguage) => {
     try {
@@ -22,11 +23,13 @@ const translateMessage = async (text, translationLanguage) => {
 export const LOCAL_VIDEO = 'LOCAL_VIDEO';
 export default function useWebRTC(roomID) {
     const [clients, updateClients] = useStateWithCallback([]);
+    const [clientID, setClientID] = useState(null);
     const [isCameraOn, setCameraOn] = useState(true);
     const [isMicrophoneOn, setMicrophoneOn] = useState(true);
     const [messages, setMessages] = useState([]);
-    const translationLanguage= useState(i18n.language);
+    const [translationLanguage]= useState(i18n.language);
     const [secondParticipantInfo, setSecondParticipantInfo] = useState(null);
+    const [subtitles, setSubtitles] = useState("");
     const addNewClient = useCallback((newClient, cb) => {
         updateClients(list => {
             if (!list.includes(newClient)) {
@@ -36,6 +39,28 @@ export default function useWebRTC(roomID) {
             return list;
         }, cb);
     }, [clients, updateClients]);
+
+    const {interimTranscript, finalTranscript, resetTranscript, listening} = useSpeechRecognition();
+
+    useEffect(() => {
+        if (isMicrophoneOn) {
+            console.log(`start listening ` + translationLanguage);
+            startListening();
+        }
+    }, []);
+
+    const startListening = () => {
+        console.log(`start listening ` + translationLanguage);
+        SpeechRecognition.startListening({
+            continuous: true,
+            language: translationLanguage
+        });
+    };
+
+    const stopListening = () => {
+        console.log(`stop listening ` + translationLanguage);
+        SpeechRecognition.stopListening();
+    };
 
     const peerConnections = useRef({});
     const localMediaStream = useRef(null);
@@ -55,6 +80,11 @@ export default function useWebRTC(roomID) {
         setMicrophoneOn(prevState => {
             const audioTrack = localMediaStream.current.getAudioTracks()[0];
             audioTrack.enabled = !prevState;
+            if (audioTrack.enabled) {
+                startListening(); 
+            } else {
+                stopListening(); 
+            }
             return !prevState;
         });
     }, []);
@@ -78,12 +108,59 @@ export default function useWebRTC(roomID) {
         }
     }, [translationLanguage]);
 
+    const sendTranscript = useCallback(async (tr) => {
+        Object.keys(peerConnections.current).forEach((peerID) => {
+            const dataChannel = peerConnections.current[peerID].dataChannel;
+            if (dataChannel) {
+                dataChannel.send(JSON.stringify(tr));
+            }
+        });
+    }, []);
+    
+    useEffect(() => {
+        const tr = {
+            transcript: finalTranscript,
+        };
+        console.log(tr);
+        sendTranscript(tr);
+        resetTranscript();
+    }, [finalTranscript, sendTranscript, resetTranscript]);
+
+    const handleIncomingTranscript = useCallback(async (data) => {
+        const tr = JSON.parse(data);
+        if(tr.transcript !== ''){
+            const translatedTranscript = await translateMessage(tr.transcript, translationLanguage);
+            if(translatedTranscript){
+                tr.transcript = translatedTranscript;
+                setSubtitles(translatedTranscript);
+            }
+        }
+        
+    }, [translationLanguage]); 
+
+    useEffect(() => {
+        socket.on(ACTIONS.RECEIVE_MESSAGE, handleIncomingMessage);
+
+        return () => {
+            socket.off(ACTIONS.RECEIVE_MESSAGE);
+        }
+    }, []);
+
+    useEffect(() => {
+        socket.on(ACTIONS.RECEIVE_TRANSCRIPT, handleIncomingTranscript);
+    
+        return () => {
+            socket.off(ACTIONS.RECEIVE_TRANSCRIPT);
+        }
+    }, []);
 
     useEffect(() => {
         async function handleNewPeer({ peerID, createOffer }) {
             if (peerID in peerConnections.current) {
                 return console.warn(`Already connected to peer ${peerID}`);
             }
+
+            setClientID(peerID);
 
             peerConnections.current[peerID] = new RTCPeerConnection({
                 iceServers: freeice(),
@@ -97,6 +174,7 @@ export default function useWebRTC(roomID) {
                     });
                 }
             }
+
             const dataChannel = peerConnections.current[peerID].createDataChannel('chat');
             peerConnections.current[peerID].dataChannel = dataChannel;
 
@@ -105,43 +183,30 @@ export default function useWebRTC(roomID) {
             };
 
             dataChannel.onmessage = (event) => {
-                handleIncomingMessage(event.data);
+                const data = JSON.parse(event.data);
+                if (data.transcript) {
+                    handleIncomingTranscript(event.data);
+                } else {
+                    console.log(data);
+                    handleIncomingMessage(event.data);
+                }
             };
+
             peerConnections.current[peerID].ondatachannel = (event) => {
                 const receiveChannel = event.channel;
                 receiveChannel.onmessage = (event) => {
-                    handleIncomingMessage(event.data);
+                    const data = JSON.parse(event.data);
+                    console.log(data);
+                    if (data.transcript) {
+                        handleIncomingTranscript(event.data);
+                    } else {
+                        handleIncomingMessage(event.data);
+                    }
                 };
             };
+            
             let tracksNumber = 0;
 
-            let recorder;
-            let recordingInterval;
-            let incomingStream = null;
-            
-            function startRecording(stream) {
-                let audioStream = new MediaStream(stream.getAudioTracks());
-                incomingStream = audioStream;
-                recorder = RecordRTC(incomingStream, {type:'audio', recorderType: RecordRTC.StereoAudioRecorder});
-                recorder.startRecording();
-                recordingInterval = setInterval(stopRecording, 10000);
-            }
-            
-            async function stopRecording() {
-                recorder.stopRecording(async function() {
-                    let blob = recorder.getBlob();
-                    let formData = new FormData();
-                    formData.append('audio', blob);
-                    formData.append('translationLanguage', translationLanguage);
-                    const response = await fetch('http://localhost:5000/generate-subtitles', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const data = await response.json();
-                    console.log(data.subtitles);
-                    startRecording(incomingStream);
-                });
-            }
             peerConnections.current[peerID].ontrack = ({ streams: [remoteStream] }) => {
                 tracksNumber++
                 if (tracksNumber === 2) {
@@ -165,8 +230,6 @@ export default function useWebRTC(roomID) {
                     });
 
                 }
-                console.log(remoteStream.getAudioTracks());
-                startRecording(remoteStream);
             }
             localMediaStream.current.getTracks().forEach(track => {
                 peerConnections.current[peerID].addTrack(track, localMediaStream.current);
@@ -282,14 +345,6 @@ export default function useWebRTC(roomID) {
         socket.emit(ACTIONS.LEAVE);
     }, []);
 
-    useEffect(() => {
-        socket.on(ACTIONS.RECEIVE_MESSAGE, handleIncomingMessage);
-
-        return () => {
-            socket.off(ACTIONS.RECEIVE_MESSAGE);
-        }
-    }, []);
-
     return {
         clients,
         provideMediaRef,
@@ -298,5 +353,6 @@ export default function useWebRTC(roomID) {
         toggleMicrophone,
         messages,
         sendMessage,
+        subtitles,
     };
 }

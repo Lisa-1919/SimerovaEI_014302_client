@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 import i18n from '../../18n';
 import { PiCamera, PiCameraSlash, PiMicrophone, PiMicrophoneSlash } from "react-icons/pi";
 import { MdCallEnd } from "react-icons/md";
-
 import { RiUserSharedFill } from "react-icons/ri";
 import AuthService from '../../services/auth.server';
 import { Email } from '../../components/Email/Email';
@@ -21,13 +20,13 @@ export default function Room() {
   // const selectedLanguage = i18n.language;
   const { id: roomID } = useParams();
   const { clients, provideMediaRef, handleLeave, toggleCamera, toggleMicrophone,
-    messages, sendMessage } = useWebRTC(roomID);
+    messages, sendMessage, subtitles } = useWebRTC(roomID);
   const [isCameraOn, setCameraOn] = useState(true);
   const [isMicrophoneOn, setMicrophoneOn] = useState(true);
   const { t } = useTranslation();
 
   const [inputMessage, setInputMessage] = useState('');
-  
+
   const [callInfo, setCallInfo] = useState({
     roomId: roomID,
     startTime: new Date(),
@@ -42,7 +41,7 @@ export default function Room() {
   const handleExitRoom = () => {
     AuthService.saveCall({
       ...callInfo,
-      endTime: new Date()  
+      endTime: new Date()
     });
     handleLeave();
     navigate('/home');
@@ -126,6 +125,9 @@ export default function Room() {
             </div>
           );
         })}
+        <div className="subtitles">
+          {subtitles}
+        </div>
       </div>
       <Chat
         messages={messages}

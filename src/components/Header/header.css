@@ -21,6 +21,10 @@
     align-items: center;
 }
 
+.toggle {
+    margin-right: 10px;
+}
+
 .btn-logout {
     width: 3vw;
     height: 3vw;

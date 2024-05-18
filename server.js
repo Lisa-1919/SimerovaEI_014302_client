@@ -102,6 +102,14 @@ io.on('connection', socket => {
         io.emit(ACTIONS.SEND_MESSAGE, { message });
     });
 
+    socket.on(ACTIONS.RECEIVE_TRANSCRIPT, ({ transcript }) => {
+        io.emit(ACTIONS.RECEIVE_TRANSCRIPT, { transcript });
+    });
+      
+    socket.on(ACTIONS.SEND_TRANSCRIPT, ({ transcript }) => {
+        io.emit(ACTIONS.SEND_TRANSCRIPT, { transcript });
+    });
+
 });
 
 

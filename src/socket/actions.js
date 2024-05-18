@@ -10,6 +10,8 @@ const ACTIONS = {
     SESSION_DESCRIPTION: 'session-description',
     SEND_MESSAGE: 'send-message', 
     RECEIVE_MESSAGE: 'receive-message',
+    SEND_TRANSCRIPT: 'send-transcript',
+    RECEIVE_TRANSCRIPT: 'receive-transcript',
 };
 
 module.exports = ACTIONS;

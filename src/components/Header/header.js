@@ -1,10 +1,12 @@
-import React from "react";
+import React, {useContext} from "react";
 import './header.css';
 import AuthService from '../../services/auth.server';
 import { useNavigate } from 'react-router-dom';
 import LanguageDropdown from "../LangDropdown/LanguageDropdown";
 import { useTranslation } from "react-i18next";
 import { RxExit } from "react-icons/rx";
+import {ThemeContext, themes} from '../../contexts/ThemeContext';
+import Toggle from '../Toggle/Toggle';
 
 
 const Header = () => {
@@ -15,6 +17,10 @@ const Header = () => {
         AuthService.logout();
         navigate('/');
     };
+    const { theme, setTheme } = useContext(ThemeContext);
+    const toggleTheme = () => {
+        setTheme(theme === themes.dark ? themes.light : themes.dark);
+    };
 
 
     return (
@@ -23,6 +29,7 @@ const Header = () => {
                 <a href='/home'>Voicager</a>
             </div>
             <div className="user">
+            <Toggle value={theme === themes.dark} onChange={toggleTheme} className="toggle"/>
                 <LanguageDropdown />
                 <div className='link'>
                     <a href='/settings'>{t("settings")}</a>
