@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useContext } from 'react';
 import { useNavigate } from 'react-router';
 import { v4 } from 'uuid';
 import Header from '../../components/Header/header';
@@ -7,6 +7,8 @@ import './main.css';
 import AuthService from '../../services/auth.server';
 import Photo from '../../components/Photo/Photo';
 import CallHistory from '../../components/CallHistory/CallHistory';
+import { ThemeContext, themes } from '../../contexts/ThemeContext';
+import Toggle from '../../components/Toggle/Toggle';
 
 function Main() {
     let navigate = useNavigate();
@@ -14,16 +16,15 @@ function Main() {
     const rootNode = useRef();
     const { t } = useTranslation();
     const user = AuthService.getCurrentUser();
-
     return (
         <div>
             <Header />
             <div className='main'>
                 <div className='user-info'>
-                    <Photo userImageUrl={user.imageUrl}/>
+                    <Photo userImageUrl={user.imageUrl} />
                     <div className='text'>
-                        <p className='user-data-text'>{user.username}</p>
-                        <p className='user-data-text'>{user.email}</p>
+                        <p className='username'>{user.username}</p>
+                        <p className='email'>{user.email}</p>
                     </div>
                 </div>
                 <CallHistory calls={user.callHistoryList} />
@@ -31,13 +32,13 @@ function Main() {
 
                     <div ref={rootNode}>
                         <div className='join'>
-                            <input type='text' value={room_id} onChange={(e) => setRoomId(e.target.value)} placeholder={t("room_id")} 
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter' && !e.shiftKey) {
-                                              e.preventDefault(); 
-                                              navigate(`/room/${room_id}`);
-                                            }
-                                          }}/>
+                            <input type='text' value={room_id} onChange={(e) => setRoomId(e.target.value)} placeholder={t("room_id")}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        navigate(`/room/${room_id}`);
+                                    }
+                                }} />
                             <button className='btn' onClick={() => {
                                 navigate(`/room/${room_id}`);
                             }}>{t("join_room")}</button>
@@ -51,7 +52,9 @@ function Main() {
                         </div>
                     </div>
                 </div>
+                
             </div>
+
         </div>
     )
 }

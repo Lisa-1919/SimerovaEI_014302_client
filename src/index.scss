@@ -1,0 +1,78 @@
+$font-url: 'https://fonts.googleapis.com/css?family=Comfortaa&display=swap';
+
+$background-color-dark: #0A1828;
+$background-color-light: #fafafa;
+$text-color-dark: #BFA181;
+$text-color-light: #212529;
+$button-color-dark: #6F8CF5;
+$button-color-light: #007BFF;
+
+@import url($font-url);
+
+body {
+  margin: 0;
+  font-family: 'Comfortaa', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-size: cover;
+}
+
+:root[data-theme="dark"] {
+  --background-color: #0A1828;
+  --text-color: #BFA181;
+  --button-color: #6F8CF5;
+}
+
+:root[data-theme="light"] {
+  --background-color: #fafafa;
+  --text-color: #0A1828;
+  --button-color: #6F8CF5;
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.btn {
+  font-family: 'Comfortaa';
+  font-size: 1.2em;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  text-transform: capitalize;
+  background-color: transparent;
+  padding: 0.5em 0.7em;
+  border-radius: 23px;
+  border: 2px solid var(--button-color);
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.btn:hover{
+  background-color: var(--button-color);
+}
+
+.input {
+  width: 318.635px;
+  height: 41.493px;
+  border-top: 0;
+  border-radius: 34px;
+  border-right: 1px solid var(--text-color);
+  border-bottom: 2px solid var(--text-color);
+  border-left: 1px solid var(--text-color);
+  color: var(--text-color);
+  background: transparent;
+
+  font-family: 'Comfortaa';
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  text-align: center;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}

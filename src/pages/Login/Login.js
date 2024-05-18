@@ -1,10 +1,12 @@
 import AuthService from '../../services/auth.server';
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import '../Registration/Registration.css';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from "react-i18next";
 import LanguageDropdown from '../../components/LangDropdown/LanguageDropdown';
+import {ThemeContext, themes} from '../../contexts/ThemeContext';
+import Toggle from '../../components/Toggle/Toggle';
 
 const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
@@ -12,6 +14,11 @@ const Login = () => {
   const [successful, setSuccessful] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  const { theme, setTheme } = useContext(ThemeContext);
+  const toggleTheme = () => {
+      setTheme(theme === themes.dark ? themes.light : themes.dark);
+  };
 
   const onSubmit = (data) => {
     setMessage('');
@@ -36,6 +43,7 @@ const Login = () => {
   return (
     <div>
       <LanguageDropdown/>
+      <Toggle value={theme === themes.dark} onChange={toggleTheme} className="toggle"/>
       <form onSubmit={handleSubmit(onSubmit)}>
         {!successful && (
           <div className='registration'>
@@ -44,6 +52,7 @@ const Login = () => {
               <div className='inputs'>
                 <div className="form-group">
                   <input
+                  className="input"
                     type="text"
                     name="username"
                     placeholder={t("login")}
@@ -53,6 +62,7 @@ const Login = () => {
                 </div>
                 <div className="form-group">
                   <input
+                  className="input"
                     type="password"
                     name="password"
                     placeholder={t("password")}

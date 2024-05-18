@@ -21,20 +21,7 @@ class AuthService {
   }
 
 
-  logout() {
-    // const user = JSON.parse(localStorage.getItem('user'));
-    // const token = user.accessToken;
-
-    // return axios
-    //   .post(API_URL + "logout",  {
-    //     headers: {
-    //       'Authorization': `Bearer ${token}`,
-    //     },
-    //   })
-    //   .then(response => {
-    //     return response.data;
-    //     localStorage.removeItem("user");
-    //   });    
+  logout() {  
     localStorage.removeItem('user');
   }
 
@@ -119,7 +106,7 @@ class AuthService {
     const user = JSON.parse(localStorage.getItem('user'));
     const token = user.accessToken;
     return axios
-      .post(API_URL + "changelanguage", {
+      .post(API_URL + "change-language", {
         username,
         language
       }, {

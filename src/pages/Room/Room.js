@@ -1,17 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import useWebRTC, { LOCAL_VIDEO } from '../../hooks/useWebRTC';
 import './room.css';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import i18n from '../../18n';
 import { PiCamera, PiCameraSlash, PiMicrophone, PiMicrophoneSlash } from "react-icons/pi";
 import { MdCallEnd } from "react-icons/md";
-
 import { RiUserSharedFill } from "react-icons/ri";
 import AuthService from '../../services/auth.server';
-import SpeechRecognitionVideo from './SpeechRecogintion';
 import { Email } from '../../components/Email/Email';
 import { AiOutlineClose } from 'react-icons/ai';
 import Chat from '../../components/Chat/Chat';
@@ -20,20 +17,16 @@ import Chat from '../../components/Chat/Chat';
 export default function Room() {
   let navigate = useNavigate();
   const user = AuthService.getCurrentUser();
-  const selectedLanguage = i18n.language;
+  // const selectedLanguage = i18n.language;
   const { id: roomID } = useParams();
   const { clients, provideMediaRef, handleLeave, toggleCamera, toggleMicrophone,
-    messages, sendMessage } = useWebRTC(roomID);
+    messages, sendMessage, subtitles } = useWebRTC(roomID);
   const [isCameraOn, setCameraOn] = useState(true);
   const [isMicrophoneOn, setMicrophoneOn] = useState(true);
   const { t } = useTranslation();
 
-  const { transcript, resetTranscript } = useSpeechRecognition();
-  const [subtitlesEnabled, setSubtitlesEnabled] = useState(false);
-  const [currentSubtitle, setCurrentSubtitle] = useState('');
-
   const [inputMessage, setInputMessage] = useState('');
-  
+
   const [callInfo, setCallInfo] = useState({
     roomId: roomID,
     startTime: new Date(),
@@ -48,7 +41,7 @@ export default function Room() {
   const handleExitRoom = () => {
     AuthService.saveCall({
       ...callInfo,
-      endTime: new Date()  
+      endTime: new Date()
     });
     handleLeave();
     navigate('/home');
@@ -72,29 +65,6 @@ export default function Room() {
     sendMessage(messageObject);
     setInputMessage('');
   };
-
-  const handleToggleSubtitles = () => {
-    setSubtitlesEnabled(prevState => !prevState);
-  };
-
-  useEffect(() => {
-    if (subtitlesEnabled) {
-      SpeechRecognition.language = selectedLanguage;
-      SpeechRecognition.startListening();
-    } else {
-      SpeechRecognition.stopListening();
-      resetTranscript();
-    }
-
-  }, [subtitlesEnabled, resetTranscript]);
-
-  useEffect(() => {
-    if (subtitlesEnabled) {
-      setCurrentSubtitle(transcript);
-    } else {
-      setCurrentSubtitle('');
-    } console.log(transcript);
-  }, [subtitlesEnabled, transcript]);
 
   const [showEmailForm, setShowEmailForm] = React.useState(false);
   const [emailSentMessage, setEmailSentMessage] = React.useState('');
@@ -141,10 +111,6 @@ export default function Room() {
                 playsInline
                 muted={clientID === LOCAL_VIDEO}
               />
-              {clientID !== LOCAL_VIDEO && (
-                <SpeechRecognitionVideo clientID={clientID} isLocalVideo={false} targetLanguage={selectedLanguage} />
-              )}
-
               {clientID === LOCAL_VIDEO && (
                 <div className='call-buttons'>
                   <button className='btn-action' onClick={handleExitRoom} ><MdCallEnd className='icon' id='call-icon' /></button>
@@ -159,6 +125,9 @@ export default function Room() {
             </div>
           );
         })}
+        <div className="subtitles">
+          {subtitles}
+        </div>
       </div>
       <Chat
         messages={messages}

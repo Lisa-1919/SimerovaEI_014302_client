@@ -4,10 +4,9 @@ import socket from "../socket";
 import ACTIONS from "../socket/actions";
 import useStateWithCallback from "./useStateWithCallback";
 import i18n from "../18n";
-import AuthService from '../services/auth.server';
 import axios from 'axios';
-import socketIOClient from 'socket.io-client';
-
+import RecordRTC from 'recordrtc';
+import SpeechRecognition, {useSpeechRecognition} from 'react-speech-recognition';
 
 const translateMessage = async (text, translationLanguage) => {
     try {
@@ -24,12 +23,13 @@ const translateMessage = async (text, translationLanguage) => {
 export const LOCAL_VIDEO = 'LOCAL_VIDEO';
 export default function useWebRTC(roomID) {
     const [clients, updateClients] = useStateWithCallback([]);
+    const [clientID, setClientID] = useState(null);
     const [isCameraOn, setCameraOn] = useState(true);
     const [isMicrophoneOn, setMicrophoneOn] = useState(true);
     const [messages, setMessages] = useState([]);
-    const selectedLanguage = i18n.language;
-    const [translationLanguage, setTranslationLanguage] = useState(i18n.language);
+    const [translationLanguage]= useState(i18n.language);
     const [secondParticipantInfo, setSecondParticipantInfo] = useState(null);
+    const [subtitles, setSubtitles] = useState("");
     const addNewClient = useCallback((newClient, cb) => {
         updateClients(list => {
             if (!list.includes(newClient)) {
@@ -39,6 +39,28 @@ export default function useWebRTC(roomID) {
             return list;
         }, cb);
     }, [clients, updateClients]);
+
+    const {interimTranscript, finalTranscript, resetTranscript, listening} = useSpeechRecognition();
+
+    useEffect(() => {
+        if (isMicrophoneOn) {
+            console.log(`start listening ` + translationLanguage);
+            startListening();
+        }
+    }, []);
+
+    const startListening = () => {
+        console.log(`start listening ` + translationLanguage);
+        SpeechRecognition.startListening({
+            continuous: true,
+            language: translationLanguage
+        });
+    };
+
+    const stopListening = () => {
+        console.log(`stop listening ` + translationLanguage);
+        SpeechRecognition.stopListening();
+    };
 
     const peerConnections = useRef({});
     const localMediaStream = useRef(null);
@@ -58,6 +80,11 @@ export default function useWebRTC(roomID) {
         setMicrophoneOn(prevState => {
             const audioTrack = localMediaStream.current.getAudioTracks()[0];
             audioTrack.enabled = !prevState;
+            if (audioTrack.enabled) {
+                startListening(); 
+            } else {
+                stopListening(); 
+            }
             return !prevState;
         });
     }, []);
@@ -81,12 +108,59 @@ export default function useWebRTC(roomID) {
         }
     }, [translationLanguage]);
 
+    const sendTranscript = useCallback(async (tr) => {
+        Object.keys(peerConnections.current).forEach((peerID) => {
+            const dataChannel = peerConnections.current[peerID].dataChannel;
+            if (dataChannel) {
+                dataChannel.send(JSON.stringify(tr));
+            }
+        });
+    }, []);
+    
+    useEffect(() => {
+        const tr = {
+            transcript: finalTranscript,
+        };
+        console.log(tr);
+        sendTranscript(tr);
+        resetTranscript();
+    }, [finalTranscript, sendTranscript, resetTranscript]);
+
+    const handleIncomingTranscript = useCallback(async (data) => {
+        const tr = JSON.parse(data);
+        if(tr.transcript !== ''){
+            const translatedTranscript = await translateMessage(tr.transcript, translationLanguage);
+            if(translatedTranscript){
+                tr.transcript = translatedTranscript;
+                setSubtitles(translatedTranscript);
+            }
+        }
+        
+    }, [translationLanguage]); 
+
+    useEffect(() => {
+        socket.on(ACTIONS.RECEIVE_MESSAGE, handleIncomingMessage);
+
+        return () => {
+            socket.off(ACTIONS.RECEIVE_MESSAGE);
+        }
+    }, []);
+
+    useEffect(() => {
+        socket.on(ACTIONS.RECEIVE_TRANSCRIPT, handleIncomingTranscript);
+    
+        return () => {
+            socket.off(ACTIONS.RECEIVE_TRANSCRIPT);
+        }
+    }, []);
 
     useEffect(() => {
         async function handleNewPeer({ peerID, createOffer }) {
             if (peerID in peerConnections.current) {
                 return console.warn(`Already connected to peer ${peerID}`);
             }
+
+            setClientID(peerID);
 
             peerConnections.current[peerID] = new RTCPeerConnection({
                 iceServers: freeice(),
@@ -100,6 +174,7 @@ export default function useWebRTC(roomID) {
                     });
                 }
             }
+
             const dataChannel = peerConnections.current[peerID].createDataChannel('chat');
             peerConnections.current[peerID].dataChannel = dataChannel;
 
@@ -108,14 +183,28 @@ export default function useWebRTC(roomID) {
             };
 
             dataChannel.onmessage = (event) => {
-                handleIncomingMessage(event.data);
+                const data = JSON.parse(event.data);
+                if (data.transcript) {
+                    handleIncomingTranscript(event.data);
+                } else {
+                    console.log(data);
+                    handleIncomingMessage(event.data);
+                }
             };
+
             peerConnections.current[peerID].ondatachannel = (event) => {
                 const receiveChannel = event.channel;
                 receiveChannel.onmessage = (event) => {
-                    handleIncomingMessage(event.data);
+                    const data = JSON.parse(event.data);
+                    console.log(data);
+                    if (data.transcript) {
+                        handleIncomingTranscript(event.data);
+                    } else {
+                        handleIncomingMessage(event.data);
+                    }
                 };
             };
+            
             let tracksNumber = 0;
 
             peerConnections.current[peerID].ontrack = ({ streams: [remoteStream] }) => {
@@ -240,7 +329,6 @@ export default function useWebRTC(roomID) {
         return () => {
             if (localMediaStream.current) {
                 localMediaStream.current.getTracks().forEach(track => track.stop());
-                // SpeechRecognition.stopListening();
                 socket.emit(ACTIONS.LEAVE);
             }
         };
@@ -257,14 +345,6 @@ export default function useWebRTC(roomID) {
         socket.emit(ACTIONS.LEAVE);
     }, []);
 
-    useEffect(() => {
-        socket.on(ACTIONS.RECEIVE_MESSAGE, handleIncomingMessage);
-
-        return () => {
-            socket.off(ACTIONS.RECEIVE_MESSAGE);
-        }
-    }, []);
-
     return {
         clients,
         provideMediaRef,
@@ -273,71 +353,6 @@ export default function useWebRTC(roomID) {
         toggleMicrophone,
         messages,
         sendMessage,
+        subtitles,
     };
 }
-
-// useEffect(() => {
-//     // ... (ваш существующий код)
-
-//     // Функция для отправки видеопотока на сервер для перевода
-//     const sendVideoForTranslation = (videoBlob) => {
-//         const socket = new WebSocket('ws://your-translation-server-url');
-//         socket.onopen = () => {
-//             // Отправка видеопотока на сервер
-//             socket.send(videoBlob);
-//         };
-//         socket.onmessage = (event) => {
-//             // Обработка полученного переведенного видеопотока
-//             const translatedVideoBlob = event.data;
-//             // Действия с переведенным видеопотоком, например, отображение его в элементе video
-//         };
-//     };
-
-//     // Модифицированная функция startCapture с отправкой видеопотока на сервер для перевода
-//     async function startCapture() {
-//         try {
-//             localMediaStream.current = await navigator.mediaDevices.getUserMedia({
-//                 audio: true,
-//                 video: {
-//                     width: 1200,
-//                     height: 720
-//                 }
-//             });
-
-//             // Convert the video stream to a Blob
-//             const mediaRecorder = new MediaRecorder(localMediaStream.current);
-//             const chunks = [];
-//             mediaRecorder.ondataavailable = e => chunks.push(e.data);
-//             mediaRecorder.onstop = () => {
-//                 const videoBlob = new Blob(chunks, { type: chunks[0].type });
-//                 // Отправка видеопотока на сервер для перевода
-//                 sendVideoForTranslation(videoBlob);
-//             };
-//             // Start recording the video stream
-//             mediaRecorder.start();
-
-//         } catch (err) {
-//             console.error("Error capturing local stream", err);
-//             return;
-//         }
-//         addNewClient(LOCAL_VIDEO, () => {
-//             const localVideoElement = peerMediaElements.current[LOCAL_VIDEO];
-//             if (localVideoElement) {
-//                 localVideoElement.volume = 0;
-//                 localVideoElement.srcObject = localMediaStream.current;
-//             }
-//         });
-//     }
-
-//     startCapture()
-//         .then(() => socket.emit(ACTIONS.JOIN, { room: roomID }))
-//         .catch(e => console.error('Error getting userMedia:', e));
-
-//     return () => {
-//         if (localMediaStream.current) {
-//             localMediaStream.current.getTracks().forEach(track => track.stop());
-
-//             socket.emit(ACTIONS.LEAVE);
-//         }
-//     };
-// }, [roomID]);

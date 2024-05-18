@@ -53,7 +53,7 @@ const Photo = ({ userImageUrl }) => {
       </div>
 
       <label htmlFor="file-upload" className="upload-button">
-        {t("upload")}
+        <IoAddOutline className='icon-upload'/>
       </label>
       <input
         id="file-upload"
