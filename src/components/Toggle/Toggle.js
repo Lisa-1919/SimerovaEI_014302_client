@@ -7,7 +7,7 @@ const Toggle = ({ value, onChange }) => (
   <DarkModeSwitch style={{ marginBottom: '2rem' }}
     checked={value}
     onClick={onChange}
-    size={120}
+    size={40}
   />
 
 )

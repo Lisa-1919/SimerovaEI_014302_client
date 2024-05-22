@@ -21,5 +21,11 @@
     "settings": "Settings",
     "change-password": "Change password",
     "old-password": "Current password",
-    "new-password": "New password"
+    "new-password": "New password",
+    "start_date": "Start Date",
+    "end_date": "End Date",
+    "language": "Language",
+    "delete": "Delete account",
+    "email_to": "Send email to",
+    "message": "Input a message"
 }

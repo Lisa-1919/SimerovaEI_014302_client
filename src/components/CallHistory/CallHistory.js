@@ -1,36 +1,34 @@
 import React from 'react';
 import {useTable} from 'react-table';
-import './call-history.css';
+import './call-history.scss';
+import { useTranslation } from "react-i18next";
 
 function CallHistory({ calls }) {
     const data = React.useMemo(() => calls, [calls]);
+    const { t } = useTranslation();
 
     const columns = React.useMemo(
         () => [
             {
-                Header: 'Call ID',
-                accessor: 'id',
-            },
-            {
-                Header: 'Start Date',
+                Header: t("start_date"),
                 accessor: 'startDate',
                 Cell: ({ value }) => new Date(value).toLocaleString(),
             },
             {
-                Header: 'End Date',
+                Header: t("end_date"),
                 accessor: 'endDate',
                 Cell: ({ value }) => new Date(value).toLocaleString(),
             },
             {
-                Header: 'Room ID',
+                Header: t("room_id"),
                 accessor: 'roomId',
             },
             {
-                Header: 'Language',
+                Header: t("language"),
                 accessor: 'language',
             }
         ],
-        []
+        [t]
     );
 
     const {
@@ -52,7 +50,7 @@ function CallHistory({ calls }) {
                     </tr>
                 ))}
             </thead>
-            <tbody {...getTableBodyProps()}>
+            <tbody {...getTableBodyProps()} >
                 {rows.map(row => {
                     prepareRow(row);
                     return (

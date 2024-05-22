@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useForm } from 'react-hook-form';
-import './Registration.css';
+import './registration-login.scss';
 import { useTranslation } from "react-i18next";
 import { useNavigate } from 'react-router-dom';
 import AuthService from '../../services/auth.server';
 import LanguageDropdown from '../../components/LangDropdown/LanguageDropdown';
-
+import { ThemeContext, themes } from '../../contexts/ThemeContext';
+import Toggle from '../../components/Toggle/Toggle';
 
 const Registration = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
@@ -13,6 +14,10 @@ const Registration = () => {
   const [successful, setSuccessful] = useState(false);
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const { theme, setTheme } = useContext(ThemeContext);
+  const toggleTheme = () => {
+    setTheme(theme === themes.dark ? themes.light : themes.dark);
+  };
 
   const onSubmit = (data) => {
     setMessage('');
@@ -46,11 +51,14 @@ const Registration = () => {
   };
 
   return (
-    <div>
-      <LanguageDropdown />
-      <form onSubmit={handleSubmit(onSubmit)}>
+    <div className="page">
+      <div className="set">
+        <LanguageDropdown />
+        <Toggle value={theme === themes.dark} onChange={toggleTheme} />
+      </div>
+      <form onSubmit={handleSubmit(onSubmit)} className='form'>
         {!successful && (
-          <div className='registration'>
+          <div >
             <p>{t("registration")}</p>
             <div className='right-align'>
               <div className='inputs'>
@@ -91,10 +99,11 @@ const Registration = () => {
                   />
                 </div>
               </div>
-              <div className='link'>
-                <a href='/'>{t("auth")}</a>
+              <div className='form-link'>
+                <a href='/' className='link'>{t("auth")}</a>
               </div>
             </div>
+
             <button className="btn">{t("sign_up")}</button>
           </div>
         )

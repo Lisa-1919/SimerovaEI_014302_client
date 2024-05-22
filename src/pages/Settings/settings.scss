@@ -1,23 +1,27 @@
-.settings{
+.settings {
     width: 90%;
     position: fixed;
-    margin-top: 7%;
+    margin-top: 14%;
     left: 50%;
     transform: translate(-50%, -7%);
-    display: inline-flex; 
+    display: inline-flex;
     justify-content: space-around;
 }
 
-.block{
+.block {
+    width: auto;
     display: block;
     justify-items: center;
+    border-radius: 8px;
+    box-shadow: 0px 0px 11px 1px var(--box-shadow);
+    padding: 20px;
 }
 
-.block .btn{
+.block .btn {
     font-size: 1em;
 }
 
-.change-password{
+.change-password {
     justify-items: center;
 }
 

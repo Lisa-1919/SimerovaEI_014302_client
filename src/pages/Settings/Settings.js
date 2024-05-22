@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from "react-i18next";
 import AuthService from '../../services/auth.server';
 import Header from '../../components/Header/header';
-import './settings.css';
+import './settings.scss';
 import i18n from '../../18n';
 import LanguageDropdown from '../../components/LangDropdown/LanguageDropdown';
 import { useNavigate } from 'react-router-dom';

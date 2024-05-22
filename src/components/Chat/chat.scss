@@ -12,59 +12,62 @@
 }
 
 .sent {
-    color: #6F8CF5;
+    color: var(--text-color);
     align-self: flex-end;
 
 }
 
 .received {
-    color: #6F8CF5;
+    color: var(--text-color);
     align-self: flex-start;
 }
 
-.username{
+.chat-username{
     margin-left: 7px;
 }
 
-.message-text{
+.chat-message-text{
     word-wrap: break-word;
     padding: 7px;
     margin-bottom: 5%;
     width: auto;
     max-width: 85%;
     border-radius: 16px;
-    border: 1px solid #BFA181;
+    border: 1px solid var(--input-border);
 }
 
-.input-message {
+.chat-input-message {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-top: 10px;
+
 }
 
-.input-message textarea {
+.chat-input-message textarea {
     max-height: 30vh;
     width: 85%;
-    color: #BFA181;
+    color: var(--text-color);
     background: transparent;
     border-radius: 15px;
-    border: 1px solid #BFA181;
+    border: 1px solid var(--input-border);
     font-family: 'Comfortaa';
     font-size: 1vw;
     text-align: left;
     resize: none;
     overflow-y: auto;
+    padding-left: 5px;
+    padding-top: 10px;
 }
 
-.input-message textarea:focus {
-    outline: #BFA181;
+.chat-input-message textarea:focus {
+    outline: var(--input-focus-border);
 }
 
 
 .icon-send:hover,
 .icon-share:hover {
-    color: #BFA181;
+    color: var(--icon-hover-color);
 }
 
 .btn-send-message {

@@ -1,4 +1,4 @@
-import './NotFound.css';
+import './NotFound.scss';
 import { useTranslation } from 'react-i18next';
 
 function NotFound404() {

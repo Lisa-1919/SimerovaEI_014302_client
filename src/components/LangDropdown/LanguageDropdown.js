@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../18n';
-import './LangDropdown.css';
+import './LangDropdown.scss';
 
 const languages = [
   { name: 'English', code: 'en' },
@@ -47,7 +47,7 @@ const LanguageDropdown = () => {
     <div className='lang-dropdown'>
       <select value={selectedLanguage} onChange={handleChange} className='select-lang'>
         {languages.map((language, index) => (
-          <option key={index} value={language.code} >
+          <option key={index} value={language.code} className='select-lang-option'>
             {language.name}
           </option>
         ))}
