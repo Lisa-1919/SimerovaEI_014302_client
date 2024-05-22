@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import useWebRTC, { LOCAL_VIDEO } from '../../hooks/useWebRTC';
-import './room.css';
+import './room.scss';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../18n';

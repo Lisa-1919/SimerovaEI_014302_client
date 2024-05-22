@@ -1,11 +1,11 @@
 import AuthService from '../../services/auth.server';
 import React, { useState, useContext } from 'react';
 import { useForm } from 'react-hook-form';
-import '../Registration/Registration.css';
+import '../Registration/registration-login.scss';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from "react-i18next";
 import LanguageDropdown from '../../components/LangDropdown/LanguageDropdown';
-import {ThemeContext, themes} from '../../contexts/ThemeContext';
+import { ThemeContext, themes } from '../../contexts/ThemeContext';
 import Toggle from '../../components/Toggle/Toggle';
 
 const Login = () => {
@@ -17,7 +17,7 @@ const Login = () => {
 
   const { theme, setTheme } = useContext(ThemeContext);
   const toggleTheme = () => {
-      setTheme(theme === themes.dark ? themes.light : themes.dark);
+    setTheme(theme === themes.dark ? themes.light : themes.dark);
   };
 
   const onSubmit = (data) => {
@@ -38,21 +38,23 @@ const Login = () => {
         });
     }
   };
-  
+
 
   return (
-    <div>
-      <LanguageDropdown/>
-      <Toggle value={theme === themes.dark} onChange={toggleTheme} className="toggle"/>
-      <form onSubmit={handleSubmit(onSubmit)}>
+    <div className='page'>
+      <div className='set'>
+        <LanguageDropdown />
+        <Toggle value={theme === themes.dark} onChange={toggleTheme} />
+      </div>
+      <form onSubmit={handleSubmit(onSubmit)} className='form'>
         {!successful && (
-          <div className='registration'>
+          <div >
             <p>{t("auth")}</p>
             <div className='right-align'>
               <div className='inputs'>
                 <div className="form-group">
                   <input
-                  className="input"
+                    className="input"
                     type="text"
                     name="username"
                     placeholder={t("login")}
@@ -62,7 +64,7 @@ const Login = () => {
                 </div>
                 <div className="form-group">
                   <input
-                  className="input"
+                    className="input"
                     type="password"
                     name="password"
                     placeholder={t("password")}
@@ -71,8 +73,9 @@ const Login = () => {
                   {errors.password && <p>{errors.password.message}</p>}
                 </div>
               </div>
-              <div className='link'>
-                <a href='/registration'>{t("registration")}</a>
+              <div className="form-link">
+                <a href='/registration' className='link'>{t("registration")}</a>
+
               </div>
             </div>
             <button className="btn">{t("sign_in")}</button>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { v4 } from 'uuid';
 import Header from '../../components/Header/header';
 import { useTranslation } from "react-i18next";
-import './main.css';
+import './main.scss';
 import AuthService from '../../services/auth.server';
 import Photo from '../../components/Photo/Photo';
 import CallHistory from '../../components/CallHistory/CallHistory';
@@ -27,9 +27,7 @@ function Main() {
                         <p className='email'>{user.email}</p>
                     </div>
                 </div>
-                <CallHistory calls={user.callHistoryList} />
                 <div className='room_actions'>
-
                     <div ref={rootNode}>
                         <div className='join'>
                             <input type='text' value={room_id} onChange={(e) => setRoomId(e.target.value)} placeholder={t("room_id")}
@@ -38,7 +36,8 @@ function Main() {
                                         e.preventDefault();
                                         navigate(`/room/${room_id}`);
                                     }
-                                }} />
+                                }}
+                                className="input" />
                             <button className='btn' onClick={() => {
                                 navigate(`/room/${room_id}`);
                             }}>{t("join_room")}</button>
@@ -52,9 +51,8 @@ function Main() {
                         </div>
                     </div>
                 </div>
-                
+                <CallHistory calls={user.callHistoryList} className='call-history'/>
             </div>
-
         </div>
     )
 }

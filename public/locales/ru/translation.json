@@ -22,5 +22,11 @@
     "settings": "Настройки",
     "change-password": "Изменить пароль",
     "old-password": "Текущий пароль",
-    "new-password": "Новый пароль"
+    "new-password": "Новый пароль",
+    "start_date": "Начало звонка",
+    "end_date": "Завершение звонка",
+    "language": "Язык",
+    "delete": "Удалить аккаунт",
+    "email_to": "Кому",
+    "message": "Введите сообщение"
 }
